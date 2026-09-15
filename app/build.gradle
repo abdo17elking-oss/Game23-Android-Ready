@@ -19,13 +19,9 @@ android {
             minifyEnabled false
             shrinkResources false
         }
+
         debug {
             minifyEnabled false
         }
     }
 }
-
-dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-}
-
