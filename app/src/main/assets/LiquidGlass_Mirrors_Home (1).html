@@ -1,0 +1,2208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Liquid Glass 3D World — Professional Home Mirrors</title>
+<style>
+:root{
+  --glass:rgba(18,24,32,.28);
+  --glass2:rgba(255,255,255,.075);
+  --line:rgba(255,255,255,.22);
+  --line2:rgba(255,255,255,.10);
+  --text:#fff;
+  --muted:rgba(255,255,255,.64);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{ -webkit-user-select:.;user-select:text }
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:var(--text);
+font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#ui{position:fixed;inset:0;pointer-events:none}
+.control,.action,.topbtn,.item,.chip{
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
+}
+.glass{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.035)),
+    linear-gradient(180deg,var(--glass),rgba(8,12,18,.20));
+  border:1px solid var(--line);
+  box-shadow:0 18px 55px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.20),inset 0 -1px 0 rgba(0,0,0,.12);
+  backdrop-filter:blur(28px) saturate(165%);
+  -webkit-backdrop-filter:blur(28px) saturate(165%);
+}
+button{font:inherit;color:#fff}
+#status{
+  position:absolute;left:12px;top:calc(env(safe-area-inset-top) + 10px);
+  max-width:46vw;padding:8px 11px;border-radius:15px;font-size:10px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+#top{
+  position:absolute;right:12px;top:calc(env(safe-area-inset-top) + 10px);
+  display:flex;gap:7px;pointer-events:auto
+}
+.topbtn{
+  min-width:42px;height:33px;padding:0 9px;border-radius:17px;
+  border:1px solid var(--line);background:var(--glass2);
+  box-shadow:0 8px 26px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.15);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);font-size:10px
+}
+.topbtn:active,.control:active,.action:active,.chip:active{transform:scale(.96);background:rgba(255,255,255,.16)}
+#dpad{
+  position:absolute;left:13px;bottom:calc(env(safe-area-inset-bottom) + 15px);
+  width:142px;height:142px;pointer-events:auto
+}
+.control{
+  position:absolute;width:44px;height:44px;border-radius:13px;
+  border:1px solid var(--line);background:rgba(255,255,255,.065);
+  box-shadow:0 9px 28px rgba(0,0,0,.17),inset 0 1px rgba(255,255,255,.16);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  padding:0
+}
+.control{font-size:10px;font-weight:700;letter-spacing:.5px;text-shadow:0 1px 8px rgba(255,255,255,.28)}
+#moveF{left:49px;top:0}#moveL{left:0;top:49px}#moveB{left:49px;top:98px}#moveR{right:0;top:49px}
+#actions{
+  position:absolute;right:13px;bottom:calc(env(safe-area-inset-bottom) + 15px);
+  display:flex;flex-wrap:wrap;gap:7px;pointer-events:auto;
+  max-width:min(280px,52vw);justify-content:flex-end
+}
+.action{
+  min-width:56px;height:43px;padding:0 9px;border-radius:20px;border:1px solid var(--line);
+  background:rgba(255,255,255,.075);box-shadow:0 9px 28px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.15);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);font-size:10px
+}
+.action.anim-act{
+  min-width:auto;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.panel{
+  position:absolute;right:12px;top:57px;width:min(370px,calc(100vw - 24px));
+  max-height:calc(100vh - 72px);overflow:auto;padding:15px;border-radius:23px;
+  pointer-events:auto;display:none
+}
+.panel.open{display:block}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.title{font-size:14px;font-weight:650}.sub{font-size:9px;color:var(--muted);margin-top:3px}
+.close{border:1px solid var(--line2);background:rgba(255,255,255,.045);color:var(--muted);font-size:9px;padding:6px 9px;border-radius:15px}
+.section{margin-top:13px;padding-top:12px;border-top:1px solid var(--line2)}
+.section:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.row{display:grid;grid-template-columns:1fr 48%;gap:10px;align-items:center;padding:8px 0}
+.row span{font-size:10px}.row small{display:block;color:var(--muted);font-size:8px;margin-top:2px}
+input[type=range]{width:100%;accent-color:#fff}
+input[type=color]{width:100%;height:28px;border:1px solid var(--line);border-radius:9px;background:transparent;padding:2px}
+input[type=text],input[type=file]{
+  width:100%;padding:8px 9px;border:1px solid var(--line);border-radius:10px;
+  background:rgba(0,0,0,.14);color:#fff;font-size:10px
+}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.item{
+  border:1px solid var(--line);border-radius:12px;padding:8px 7px;
+  background:rgba(255,255,255,.055);box-shadow:inset 0 1px rgba(255,255,255,.12);font-size:10px
+}
+#selection{
+  position:absolute;display:none;transform:translate(-50%,-110%);padding:6px 9px;
+  border-radius:10px;font-size:9px;white-space:nowrap
+}
+#toast{
+  position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 76px);
+  transform:translateX(-50%);padding:8px 12px;border-radius:12px;font-size:9px;
+  opacity:0;transition:.2s;white-space:nowrap
+}
+#toast.show{opacity:1}
+@media(max-width:430px){
+  #top{gap:5px}.topbtn{min-width:39px;padding:0 8px}
+  #actions{gap:5px}.action{min-width:55px;padding:0 8px}
+}
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="ui">
+  <div id="status" class="glass">World ready</div>
+
+  <div id="top">
+    <button id="pause" class="topbtn">Pause</button>
+    <button id="animBtn" class="topbtn">Anim</button>
+    <button id="addBtn" class="topbtn">Add</button>
+    <button id="worldBtn" class="topbtn">World</button>
+  </div>
+
+  <div id="dpad">
+    <button id="moveF" class="control" aria-label="Move forward">UP</button>
+    <button id="moveL" class="control" aria-label="Move left">LT</button>
+    <button id="moveB" class="control" aria-label="Move backward">DN</button>
+    <button id="moveR" class="control" aria-label="Move right">RT</button>
+  </div>
+
+  <div id="actions">
+    <button id="jump" class="action">Jump</button>
+    <button id="run" class="action">Run</button>
+    <button id="driveAction" class="action">Drive</button>
+    <!-- dynamic anim buttons injected here -->
+  </div>
+
+  <div id="selection" class="glass"></div>
+  <div id="toast" class="glass"></div>
+
+  <section id="animPanel" class="panel glass">
+    <div class="head">
+      <div>
+        <div class="title">Animations</div>
+        <div class="sub">✓ = show as button next to Jump / Run</div>
+      </div>
+      <button class="close" data-close="animPanel">Close</button>
+    </div>
+    <div class="section" style="padding-top:0">
+      <div id="animChecklist" style="display:flex;flex-direction:column;gap:6px;max-height:min(55vh,420px);overflow:auto"></div>
+    </div>
+    <div class="section">
+      <button id="animSelectAll" class="item" style="width:100%;margin-bottom:6px">Select action defaults</button>
+      <button id="animClearAll" class="item" style="width:100%">Clear extra buttons</button>
+    </div>
+  </section>
+
+  <section id="worldPanel" class="panel glass">
+    <div class="head">
+      <div><div class="title">World</div><div class="sub">Live environment controls</div></div>
+      <button class="close" data-close="worldPanel">Close</button>
+    </div>
+
+    <div class="section">
+      <div class="row"><span>Time of day<small>0 midnight · 0.25 sunrise · 0.5 noon · 0.75 sunset</small></span><input id="day" type="range" min="0" max="1" step=".001" value=".62"></div>
+      <div class="row"><span>Sun direction<small>Rotate the whole day arc</small></span><input id="sunAngle" type="range" min="0" max="6.283" step=".001" value="3.8"></div>
+      <div class="row"><span>Sky saturation</span><input id="skySat" type="range" min="0" max="1" step=".001" value=".65"></div>
+    </div>
+
+    <div class="section">
+      <div class="row"><span>Ground color<small>Live surface color</small></span><input id="groundColor" type="color" value="#7a8a6e"></div>
+      <div class="row"><span>Ground brightness<small>Higher = more lit ground</small></span><input id="groundBright" type="range" min="0.2" max="3.5" step=".001" value="1.35"></div>
+      <div class="row"><span>Ground size</span><input id="groundSize" type="range" min="60" max="600" step="1" value="220"></div>
+      <div class="row"><span>Ground height</span><input id="groundHeight" type="range" min="-2" max="4" step=".01" value="0"></div>
+      <div class="row"><span>Fog / horizon blend</span><input id="fog" type="range" min="0" max="1" step=".001" value=".18"></div>
+    </div>
+
+    <div class="section">
+      <div class="row"><span>World lighting</span><input id="light" type="range" min="0" max="2.5" step=".001" value="1.15"></div>
+      <div class="row"><span>Character front light<small>Key light (upper front)</small></span><input id="charFront" type="range" min="0" max="2.5" step=".001" value="0.7"></div>
+      <div class="row"><span>Character back light<small>Rim light (behind)</small></span><input id="charBack" type="range" min="0" max="2.5" step=".001" value="0.65"></div>
+      <div class="row"><span>Character fill<small>Soft ambient fill</small></span><input id="charFill" type="range" min="0" max="2.5" step=".001" value="0.85"></div>
+      <div class="row">
+        <span>Man scale<small>No limits — free scale</small></span>
+        <div id="manScaleControls" style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+          <button id="manScaleMinus" class="item" type="button" style="min-width:42px;height:34px;padding:0;font-size:18px;line-height:1">−</button>
+          <span id="manScaleValue" style="min-width:72px;text-align:center;font-size:10px;font-variant-numeric:tabular-nums">1.0000</span>
+          <button id="manScalePlus" class="item" type="button" style="min-width:42px;height:34px;padding:0;font-size:18px;line-height:1">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <button id="delete" class="item" style="width:100%">Delete selected object</button>
+      <button id="clearSave" class="item" style="width:100%;margin-top:7px">Reset saved world</button>
+    </div>
+  </section>
+
+  <section id="addPanel" class="panel glass">
+    <div class="head">
+      <div><div class="title">Add to world</div><div class="sub">Objects · import</div></div>
+      <button class="close" data-close="addPanel">Close</button>
+    </div>
+
+    <div class="section">
+      <div class="grid">
+        <button class="item" data-type="Girl">Girl</button>
+        <button class="item" data-type="Home">Home</button>
+        <button class="item" data-type="Car">Car</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row" style="display:block">
+        <span>Import GLB / GLTF</span>
+        <small style="margin:5px 0 7px">Supports multiple files. Loads one by one to keep the game smooth.</small>
+        <input id="modelFiles" type="file" accept=".glb,.gltf,.bin,.png,.jpg,.jpeg,.webp" multiple>
+      </div>
+      <div class="row" style="display:block">
+        <span>Name (optional)</span>
+        <input id="objectName" type="text" placeholder="Object name">
+      </div>
+      <button id="importModel" class="item" style="width:100%">Import model(s)</button>
+      <div id="importStatus" style="margin-top:8px;font-size:9px;color:var(--muted)"></div>
+    </div>
+
+    <div class="section">
+      <div class="grid">
+        <button id="rotL" class="item">Rotate left</button>
+        <button id="rotR" class="item">Rotate right</button>
+        <button id="raise" class="item">Raise</button>
+        <button id="lower" class="item">Lower</button>
+      </div>
+      <div class="grid" style="margin-top:7px">
+        <button id="scaleMinus" class="item">Scale −</button>
+        <button id="scalePlus" class="item">Scale +</button>
+      </div>
+      <button id="driveBtn" class="item" style="width:100%;margin-top:7px">Drive / Exit vehicle</button>
+      <div style="font-size:8px;color:var(--muted);margin-top:6px">Select from list below only · D-pad moves selected · Scale ± · Drive/E for cars</div>
+    </div>
+
+    <div class="section">
+      <div class="title" style="font-size:12px;margin-bottom:8px">World objects</div>
+      <div id="objectList" style="max-height:180px;overflow:auto;display:flex;flex-direction:column;gap:5px"></div>
+      <div class="grid" style="margin-top:8px">
+        <button id="deselectBtn" class="item">Deselect</button>
+        <button id="deleteSelected" class="item">Delete selected</button>
+        <button id="deleteAllObjs" class="item">Delete all</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"./three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
+import {Sky} from "three/addons/objects/Sky.js";
+import {RoomEnvironment} from "three/addons/environments/RoomEnvironment.js";
+
+const $=id=>document.getElementById(id);
+const canvas=$("view");
+const scene=new THREE.Scene();
+
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.05,900);
+camera.position.set(0,2.85,6.5);
+
+const renderer=new THREE.WebGLRenderer({
+  canvas,antialias:true,powerPreference:"high-performance"
+});
+renderer.setPixelRatio(Math.min(devicePixelRatio,innerWidth<700?2:2));
+renderer.setSize(innerWidth,innerHeight,false);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.28;
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.info.autoReset=true;
+
+// Global environment map — makes metal/glass/mirror materials reflect the world
+const pmrem=new THREE.PMREMGenerator(renderer);
+pmrem.compileEquirectangularShader();
+const roomEnv=new RoomEnvironment();
+const envRT=pmrem.fromScene(roomEnv,0.04);
+scene.environment=envRT.texture;
+roomEnv.dispose();
+
+/* ---------- Professional static mirrors — Home.glb only (nodes named "Mirror") ----------
+   Only meshes/nodes whose name contains "Mirror" (case-insensitive) inside Home.glb
+   become true mirrors. Shared low-cost cubemap reflects sky + ground + fog +
+   atmosphere + clouds + stars + moon/sun ONLY. Man and every other object are
+   hidden during capture, so the reflection is completely independent of the
+   character and never changes when Man moves. Updated rarely (or on env change)
+   from a fixed / Home-centered position to stay smooth on mobile. */
+const mirrorCubeRT=new THREE.WebGLCubeRenderTarget(256,{
+  generateMipmaps:true,
+  minFilter:THREE.LinearMipmapLinearFilter,
+  magFilter:THREE.LinearFilter
+});
+mirrorCubeRT.texture.colorSpace=THREE.SRGBColorSpace;
+const mirrorCubeCamera=new THREE.CubeCamera(.1,800,mirrorCubeRT);
+mirrorCubeCamera.visible=false;
+scene.add(mirrorCubeCamera);
+let mirrorMaterials=[];
+let mirrorRefreshFrame=0;
+let mirrorNeedsUpdate=true;
+
+function isMirrorName(name){
+  return !!(name&&/mirror/i.test(String(name)));
+}
+
+function registerHomeMirrorMaterial(m){
+  if(!m||!m.isMaterial)return;
+  if(!m.userData)m.userData={};
+  if(m.userData.__homeMirror)return;
+  m.userData.__homeMirror=true;
+  // Pure mirror response while keeping any original tint/maps
+  m.metalness=1.0;
+  m.roughness=Math.min(Number(m.roughness??0.2),0.08);
+  m.envMapIntensity=Math.max(1.6,Number(m.envMapIntensity||0));
+  m.needsUpdate=true;
+  mirrorMaterials.push(m);
+}
+
+/** Walk Home.glb and promote only nodes/meshes named Mirror (or parent named Mirror). */
+function prepareHomeMirrors(obj){
+  if(!obj)return;
+  obj.traverse(c=>{
+    if(!c.isMesh||!c.material)return;
+    let p=c, isMir=false;
+    while(p){
+      if(isMirrorName(p.name)){isMir=true;break;}
+      p=p.parent;
+    }
+    if(!isMir)return;
+    const mats=Array.isArray(c.material)?c.material:[c.material];
+    mats.forEach(registerHomeMirrorMaterial);
+  });
+}
+
+function updateLightMirrors(force=false){
+  if(!mirrorMaterials.length)return;
+  if(!force&&!mirrorNeedsUpdate&&(++mirrorRefreshFrame%48)!==0)return;
+  mirrorNeedsUpdate=false;
+
+  // Fixed / Home-centered capture — NEVER follows the player
+  const camPos=new THREE.Vector3(0,4.5,0);
+  const home=objects.find(o=>o.userData&&o.userData.type==="Home");
+  if(home){
+    const box=new THREE.Box3().setFromObject(home);
+    if(!box.isEmpty()){
+      box.getCenter(camPos);
+      camPos.y=Math.max(camPos.y,groundY+3.2);
+    }
+  }
+  mirrorCubeCamera.position.copy(camPos);
+  mirrorCubeCamera.updateMatrixWorld(true);
+
+  // Hide Man + every world object so only environment is reflected
+  const hidden=[];
+  if(player){hidden.push({o:player,v:player.visible});player.visible=false;}
+  for(const o of objects){
+    if(o.visible){hidden.push({o,v:true});o.visible=false;}
+  }
+  if(typeof selectionHelper!=="undefined"&&selectionHelper){
+    hidden.push({o:selectionHelper,v:selectionHelper.visible});
+    selectionHelper.visible=false;
+  }
+
+  const oldVis=mirrorCubeCamera.visible;
+  mirrorCubeCamera.visible=false;
+  try{
+    mirrorCubeCamera.update(renderer,scene);
+  }finally{
+    for(const h of hidden)h.o.visible=h.v;
+    mirrorCubeCamera.visible=oldVis;
+  }
+
+  for(const m of mirrorMaterials){
+    if(m)m.envMap=mirrorCubeRT.texture;
+  }
+}
+
+const hemi=new THREE.HemisphereLight(0xcfe7ff,0x56604f,1);
+const fillLight=new THREE.DirectionalLight(0x7898bd,.42);
+fillLight.position.set(-45,28,-45);
+const sunLight=new THREE.DirectionalLight(0xfff1d4,2);
+sunLight.castShadow=true;
+sunLight.shadow.mapSize.set(innerWidth>900?2048:1024,innerWidth>900?2048:1024);
+sunLight.shadow.bias=-.00008;
+sunLight.shadow.normalBias=.018;
+sunLight.shadow.camera.near=.2;
+sunLight.shadow.camera.far=180;
+sunLight.shadow.camera.left=-75;
+sunLight.shadow.camera.right=75;
+sunLight.shadow.camera.top=75;
+sunLight.shadow.camera.bottom=-75;
+scene.add(hemi,fillLight,sunLight);
+
+const root=new THREE.Group();
+scene.add(root);
+
+let worldSize=220;
+let groundY=0;
+let ground;
+let selected=null;
+let paused=false;
+let running=false;
+
+const move={x:0,z:0};
+const keys={};
+
+let player=null;
+let playerVisual=null;
+let mixer=null;
+let actions={};
+let currentAction=null;
+let velocityY=0;
+let grounded=true;
+// Scale is completely free — no min/max limits. Default starts reasonable.
+let manScale=1.0;
+let manBaseScale=1;
+let manBaseHeight=1.8;
+let manCurrentHeight=1.8; // updated live for camera
+
+const objects=[];
+const colliders=[];
+const collisionMeshes=[];
+
+/* Man scale UI starts from one deterministic value every run unless saved by World. */
+
+const env={
+  day:.62,
+  angle:3.8,
+  height:.42,
+  skySat:.65,
+  fog:.18,
+  light:1.15,
+  groundColor:"#7a8a6e",
+  groundBright:1.35,
+  charFront:0.7,
+  charBack:0.65,
+  charFill:0.85
+};
+
+/* ---------- AAA third-person camera: shoulder lock, never drops to feet ---------- */
+const cameraState={
+  yaw:Math.PI,
+  pitch:0.32,
+  idealDistance:5.5,
+  currentDistance:5.5,
+  targetOffset:new THREE.Vector3(0,1.4,0),
+  sensitivity:0.004,
+  zoom:0,
+  collisionMargin:0.35
+};
+const cameraTargetPos=new THREE.Vector3();
+const cameraRaycaster=new THREE.Raycaster();
+const cameraDirection=new THREE.Vector3();
+const cameraTarget=new THREE.Vector3();
+const cameraIdeal=new THREE.Vector3();
+const cameraRayDir=new THREE.Vector3();
+const cameraFinal=new THREE.Vector3();
+const cameraUp=new THREE.Vector3(0,1,0);
+
+function isPlayerObject(obj){
+  let p=obj;
+  while(p){
+    if(p===player)return true;
+    p=p.parent;
+  }
+  return false;
+}
+
+function getCharacterHeight(){
+  if(playerVisual){
+    const box=new THREE.Box3().setFromObject(playerVisual);
+    const h=box.max.y-box.min.y;
+    if(h>0.05)return h;
+  }
+  return manCurrentHeight>0.05?manCurrentHeight:1.8;
+}
+
+function updateFollowCamera(dt){
+  if(!player)return;
+
+  const charH=Math.max(0.5,getCharacterHeight());
+  manCurrentHeight=charH;
+
+  // === HARD LIMITS (this is what stops the feet problem) ===
+  // Minimum distance ≈ full body length — you can never get close enough to see only feet
+  const minD=charH*1.65;
+  const maxD=charH*12;
+  const baseDist=charH*3.1;
+
+  cameraState.idealDistance=THREE.MathUtils.clamp(
+    baseDist+cameraState.zoom,
+    minD,
+    maxD
+  );
+
+  // Always look at UPPER CHEST / SHOULDERS — never mid-body or lower
+  // Height is locked relative to character, independent of zoom
+  const lookHeight=charH*0.78;
+  cameraState.targetOffset.set(0,lookHeight,0);
+
+  cameraTarget.copy(player.position).add(cameraState.targetOffset);
+  cameraTargetPos.copy(cameraTarget);
+
+  // Clamp pitch so camera never looks steeply down at the body
+  cameraState.pitch=THREE.MathUtils.clamp(cameraState.pitch,0.18,0.85);
+
+  const cosPitch=Math.cos(cameraState.pitch);
+  const sinPitch=Math.sin(cameraState.pitch);
+  const sinYaw=Math.sin(cameraState.yaw);
+  const cosYaw=Math.cos(cameraState.yaw);
+
+  // Direction from character toward camera (camera sits above and behind)
+  cameraDirection.set(
+    sinYaw*cosPitch,
+    sinPitch,
+    cosYaw*cosPitch
+  ).normalize();
+
+  cameraIdeal.copy(cameraTargetPos)
+    .addScaledVector(cameraDirection,cameraState.idealDistance);
+
+  // Obstacle collision
+  cameraRayDir.copy(cameraIdeal).sub(cameraTargetPos).normalize();
+  cameraRaycaster.set(cameraTargetPos,cameraRayDir);
+  cameraRaycaster.far=cameraState.idealDistance;
+
+  const hits=cameraRaycaster.intersectObjects(collisionMeshes,true)
+    .filter(hit=>!isPlayerObject(hit.object)&&hit.distance>0.2);
+
+  let targetDist=cameraState.idealDistance;
+  if(hits.length>0){
+    targetDist=Math.max(hits[0].distance-cameraState.collisionMargin,minD);
+  }
+
+  cameraState.currentDistance=THREE.MathUtils.lerp(
+    cameraState.currentDistance,
+    targetDist,
+    1-Math.exp(-12*dt)
+  );
+
+  // Place camera
+  cameraFinal.copy(cameraTargetPos)
+    .addScaledVector(cameraRayDir,cameraState.currentDistance);
+
+  // === ABSOLUTE HEIGHT LOCK ===
+  // Camera Y can NEVER go below shoulder height, period.
+  const absoluteMinY=player.position.y+charH*0.72;
+  if(cameraFinal.y<absoluteMinY){
+    cameraFinal.y=absoluteMinY;
+  }
+
+  // Extra safety: if somehow still too low relative to look target, push up
+  if(cameraFinal.y<cameraTargetPos.y-charH*0.05){
+    cameraFinal.y=cameraTargetPos.y+charH*0.15;
+  }
+
+  camera.position.copy(cameraFinal);
+  camera.lookAt(cameraTargetPos);
+}
+
+function say(t){
+  $("status").textContent=t;
+  clearTimeout(say.t);
+  say.t=setTimeout(()=>$("status").textContent="World ready",2600);
+}
+function toast(t){
+  $("toast").textContent=t;
+  $("toast").classList.add("show");
+  clearTimeout(toast.t);
+  toast.t=setTimeout(()=>$("toast").classList.remove("show"),1800);
+}
+function mat(c,r=.78,m=0){
+  return new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+}
+
+/* ---------- Real sky: sun + moon + stars + gradient ---------- */
+const skyUniforms={
+  day:{value:env.day},
+  sunDir:{value:new THREE.Vector3(0,.8,0)},
+  moonDir:{value:new THREE.Vector3(0,-.8,0)},
+  sat:{value:env.skySat}
+};
+const sky=new THREE.Mesh(
+  new THREE.SphereGeometry(420,64,32),
+  new THREE.ShaderMaterial({
+    side:THREE.BackSide,
+    depthWrite:false,
+    uniforms:skyUniforms,
+    vertexShader:`
+      varying vec3 vWorld;
+      void main(){vWorld=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}
+    `,
+    fragmentShader:`
+      uniform float day; uniform vec3 sunDir; uniform vec3 moonDir; uniform float sat;
+      varying vec3 vWorld;
+      void main(){
+        float h=clamp(vWorld.y*.5+.5,0.,1.);
+        float horizon=smoothstep(0.02,.58,h);
+        float sunDot=max(dot(vWorld,sunDir),0.0);
+        float moonDot=max(dot(vWorld,moonDir),0.0);
+        float sunGlow=pow(sunDot,110.)*1.35+pow(sunDot,7.)*.10;
+        float moonGlow=pow(moonDot,170.)*.45;
+        vec3 nightLow=vec3(.004,.008,.018);
+        vec3 nightHigh=vec3(.018,.035,.085);
+        vec3 dayLow=vec3(.78,.48,.28);
+        vec3 dayMid=vec3(.28,.56,.82);
+        vec3 dayHigh=vec3(.08,.27,.58);
+        vec3 night=mix(nightLow,nightHigh,horizon);
+        vec3 dayCol=mix(dayLow,dayMid,smoothstep(.10,.55,h));
+        dayCol=mix(dayCol,dayHigh,smoothstep(.48,1.,h));
+        float daylight=smoothstep(-.12,.18,sunDir.y);
+        vec3 col=mix(night,dayCol,daylight);
+        float lum=dot(col,vec3(.299,.587,.114));
+        col=mix(vec3(lum),col,sat);
+        col+=vec3(1.0,.38,.10)*sunGlow*(.30+.70*daylight);
+        col+=vec3(.55,.70,1.0)*moonGlow*(1.0-daylight);
+        gl_FragColor=vec4(col,1.0);
+      }
+    `
+  })
+);
+scene.add(sky);
+
+/* ---------- physical atmosphere layer ---------- */
+const atmosphere=new Sky();
+atmosphere.scale.setScalar(450);
+atmosphere.material.uniforms.turbidity.value=7;
+atmosphere.material.uniforms.rayleigh.value=2.2;
+atmosphere.material.uniforms.mieCoefficient.value=.0045;
+atmosphere.material.uniforms.mieDirectionalG.value=.78;
+atmosphere.material.depthWrite=false;
+scene.add(atmosphere);
+
+/* ---------- lightweight dynamic cloud layer ---------- */
+const cloudUniforms={uTime:{value:0},uSunPosition:{value:new THREE.Vector3()}};
+const cloud=new THREE.Mesh(new THREE.SphereGeometry(438,32,20),new THREE.ShaderMaterial({
+  side:THREE.BackSide,transparent:true,depthWrite:false,uniforms:cloudUniforms,
+  vertexShader:`varying vec3 vWorld;void main(){vWorld=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+  fragmentShader:`uniform float uTime;uniform vec3 uSunPosition;varying vec3 vWorld;
+    float hash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+    float noise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+      return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+      mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+    void main(){vec3 p=vWorld*3.1+vec3(uTime*.018,0.,uTime*.012);float n=noise(p)+.5*noise(p*2.)+.25*noise(p*4.);
+      float d=smoothstep(.88,1.38,n);float horizon=smoothstep(.02,.24,vWorld.y);if(d<.025)discard;
+      float sun=max(dot(vWorld,normalize(uSunPosition)),0.);vec3 c=mix(vec3(.34,.40,.48),vec3(1.),d);c+=vec3(1.,.55,.25)*pow(sun,8.)*.7;
+      gl_FragColor=vec4(c,d*.62*horizon);}`
+}));
+scene.add(cloud);
+const sunDisc=new THREE.Mesh(
+  new THREE.SphereGeometry(3.2,24,16),
+  new THREE.MeshBasicMaterial({color:0xfff4c7})
+);
+sunDisc.renderOrder=2;
+scene.add(sunDisc);
+
+const stars=new THREE.Points(
+  new THREE.BufferGeometry(),
+  new THREE.PointsMaterial({color:0xffffff,size:.72,sizeAttenuation:true,transparent:true,opacity:0,depthWrite:false})
+);
+{
+  const pos=[];
+  for(let i=0;i<1400;i++){
+    const a=Math.random()*Math.PI*2;
+    const y=Math.random()*.92+.08;
+    const r=Math.sqrt(1-y*y);
+    pos.push(Math.cos(a)*r*390,y*390,Math.sin(a)*r*390);
+  }
+  stars.geometry.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+}
+scene.add(stars);
+
+const moon=new THREE.Mesh(
+  new THREE.SphereGeometry(5,24,16),
+  new THREE.MeshStandardMaterial({color:0xdbe7f2,emissive:0x4d6175,emissiveIntensity:.18,roughness:1})
+);
+scene.add(moon);
+
+function applyEnvironment(){
+  /* A real 24-hour arc: midnight -> sunrise -> noon -> sunset -> midnight. */
+  const t=env.day;
+  const elevation=Math.sin((t-.25)*Math.PI*2);
+  const az=env.angle;
+  const cosE=Math.cos(Math.asin(elevation));
+  const dir=new THREE.Vector3(Math.cos(az)*cosE,elevation,Math.sin(az)*cosE).normalize();
+  const moonDir=dir.clone().multiplyScalar(-1);
+
+  skyUniforms.day.value=env.day;
+  skyUniforms.sunDir.value.copy(dir);
+  skyUniforms.moonDir.value.copy(moonDir);
+  skyUniforms.sat.value=env.skySat;
+  cloudUniforms.uSunPosition.value.copy(dir);
+  cloudUniforms.uTime.value=performance.now()*.001;
+
+  sunLight.position.copy(dir).multiplyScalar(140);
+  const skySun=dir.clone().multiplyScalar(140);
+  atmosphere.material.uniforms.sunPosition.value.copy(skySun);
+  sunDisc.position.copy(dir).multiplyScalar(135);
+  sunDisc.visible=elevation>-.08;
+  const daylight=THREE.MathUtils.smoothstep(elevation,-.10,.18);
+  const nightAmt=1-daylight;
+
+  // Better day/night balance — still readable at night
+  fillLight.intensity=(.18+.55*daylight)*env.light;
+  fillLight.position.set(-dir.x*70,38,-dir.z*70);
+  sunLight.intensity=(0.05+2.15*env.light)*daylight;
+  hemi.intensity=(.22+.90*env.light)*(0.35+.65*daylight);
+  hemi.color.setHSL(.56,.30,.52+.32*daylight);
+  hemi.groundColor.setHSL(.28,.18,.22+.18*daylight);
+
+  // Soft moonlight contribution at night so world isn't pure black
+  if(nightAmt>0.05){
+    fillLight.intensity+=0.22*nightAmt*env.light;
+    hemi.intensity+=0.18*nightAmt*env.light;
+  }
+
+  moon.position.copy(moonDir).multiplyScalar(135);
+  stars.material.opacity=THREE.MathUtils.clamp((-.02-elevation)*2.1,0,.96);
+
+  const horizon=new THREE.Color().setHSL(
+    daylight>0.35?0.58:0.62,
+    daylight>0.35?0.35:0.25,
+    daylight>0.35?0.62:0.08
+  );
+  if(!scene.fog)scene.fog=new THREE.FogExp2(horizon,.001);
+  scene.fog.color.copy(horizon);
+  scene.fog.density=.00018+env.fog*.010;
+
+  groundMat.color.set(env.groundColor).multiplyScalar(env.groundBright);
+  sunLight.shadow.camera.updateProjectionMatrix();
+
+  // Character lights — direct control from World panel, balanced for day/night
+  if(player){
+    const manKey=player.getObjectByName("ManKey");
+    const manFillL=player.getObjectByName("ManFill");
+    const manRim=player.getObjectByName("ManRim");
+    const manSide=player.getObjectByName("ManSide");
+    // Values map almost 1:1 so the sliders feel responsive and real
+    if(manKey) manKey.intensity=env.charFront*(0.55+0.45*daylight);
+    if(manRim) manRim.intensity=env.charBack*(0.5+0.5*Math.max(nightAmt,0.35));
+    if(manFillL) manFillL.intensity=env.charFill*(0.6+0.4*daylight);
+    if(manSide) manSide.intensity=env.charFront*0.35*(0.5+0.5*daylight);
+  }
+
+  // Refresh static mirrors when sky / fog / lighting changes (still independent of Man)
+  mirrorNeedsUpdate=true;
+}
+
+/* ---------- granular ground ---------- */
+const groundMat=new THREE.MeshStandardMaterial({
+  color:env.groundColor,
+  roughness:.88,
+  metalness:0.02
+});
+function makeGroundTexture(){
+  const c=document.createElement("canvas");
+  c.width=c.height=512;
+  const ctx=c.getContext("2d");
+  const img=ctx.createImageData(512,512);
+  for(let i=0;i<img.data.length;i+=4){
+    const n=58+Math.random()*58;
+    img.data[i]=n*.92;
+    img.data[i+1]=n;
+    img.data[i+2]=n*.80;
+    img.data[i+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+  const t=new THREE.CanvasTexture(c);
+  t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  t.repeat.set(85,85);
+  t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+groundMat.map=makeGroundTexture();
+
+function rebuildGround(){
+  if(ground){
+    scene.remove(ground);
+    ground.geometry.dispose();
+  }
+  ground=new THREE.Mesh(new THREE.PlaneGeometry(worldSize,worldSize),groundMat);
+  ground.rotation.x=-Math.PI/2;
+  ground.position.y=groundY;
+  ground.receiveShadow=true;
+  scene.add(ground);
+}
+rebuildGround();
+refreshColliders();
+applyEnvironment();
+
+/* ---------- GLB assets (Girl / Home / Car) — external files ---------- */
+const assetLoader=new GLTFLoader();
+const assetCache={};
+
+async function loadAssetGLB(path,type,name,opts={}){
+  try{
+    let gltf=assetCache[path];
+    if(!gltf){
+      gltf=await assetLoader.loadAsync(path);
+      assetCache[path]=gltf;
+    }
+    const o=gltf.scene.clone(true);
+    o.traverse(c=>{
+      if(c.isMesh&&c.material){
+        c.material=Array.isArray(c.material)?c.material.map(m=>m.clone()):c.material.clone();
+      }
+    });
+    o.userData={
+      type,
+      solid:true,
+      vehicle:type==="Car",
+      imported:true,
+      assetPath:path
+    };
+    o.name=name||type;
+    optimizeImportedModel(o);
+    // Only Home.glb nodes named "Mirror" become professional static mirrors
+    if(type==="Home"){
+      prepareHomeMirrors(o);
+      mirrorNeedsUpdate=true;
+      updateLightMirrors(true);
+    }
+    if(opts.skipPlace){
+      root.add(o);
+      objects.push(o);
+      return o;
+    }
+    place(o,o.name);
+    say(type+" loaded");
+    toast(type+" added");
+    return o;
+  }catch(e){
+    console.error(e);
+    toast(type+" failed — put "+path+" next to the HTML");
+    say("Missing "+path);
+    return null;
+  }
+}
+
+function createPlaceholder(type){
+  // Minimal fallback only if GLB missing (not the old cartoon meshes)
+  const g=new THREE.Group();
+  g.userData={type,solid:true,vehicle:type==="Car"};
+  g.name=type+" (missing GLB)";
+  const mesh=new THREE.Mesh(
+    type==="Car"?new THREE.BoxGeometry(2.2,0.9,4.2):
+    type==="Home"?new THREE.BoxGeometry(4,2.5,4):
+    new THREE.CapsuleGeometry(0.3,1,6,10),
+    mat(0x666666,0.8)
+  );
+  mesh.position.y=type==="Home"?1.25:type==="Car"?0.45:0.9;
+  mesh.castShadow=true;mesh.receiveShadow=true;
+  g.add(mesh);
+  return g;
+}
+
+/* ---------- exact placement / collision ---------- */
+function fitToGround(o){
+  const b=new THREE.Box3().setFromObject(o);
+  o.position.y+=groundY-b.min.y;
+}
+
+function disposeObject(o){
+  if(!o)return;
+  o.traverse(child=>{
+    if(child.isMesh){
+      if(child.geometry)child.geometry.dispose();
+      const mats=Array.isArray(child.material)?child.material:[child.material];
+      for(const m of mats){
+        if(!m)continue;
+        for(const key of Object.keys(m)){
+          if(m[key]&&m[key].isTexture)m[key].dispose();
+        }
+        if(m.dispose)m.dispose();
+      }
+    }
+    if(child.userData&&child.userData._blobUrls){
+      child.userData._blobUrls.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});
+    }
+  });
+  if(o.parent)o.parent.remove(o);
+}
+
+function optimizeImportedModel(rootObj){
+  rootObj.traverse(x=>{
+    if(!x.isMesh)return;
+    x.frustumCulled=true;
+    // Keep visual quality: static models receive light/shadows normally,
+    // but avoid expensive per-object shadow casting on the mobile GPU.
+    x.castShadow=true;
+    x.receiveShadow=true;
+    if(x.geometry){
+      x.geometry.computeBoundingSphere();
+    }
+    // Mirrors are handled exclusively by prepareHomeMirrors (Home.glb + name "Mirror")
+  });
+}
+
+function place(o,name){
+  o.name=name||o.userData.type||"Object";
+  const base=player?player.position:new THREE.Vector3(0,groundY,0);
+  const offset=1.8+objects.length*0.15;
+  o.position.set(base.x+offset,groundY,base.z-2.2);
+  root.add(o);
+  objects.push(o);
+  fitToGround(o);
+  // Freeze static props only (not cars — they move)
+  if(!o.userData.vehicle&&(o.userData.imported||o.userData.type==="Home"||o.userData.type==="Girl")){
+    requestAnimationFrame(()=>{
+      o.updateMatrixWorld(true);
+      o.traverse(c=>{
+        if(c!==o)c.matrixAutoUpdate=false;
+      });
+    });
+  }else{
+    o.traverse(c=>{c.matrixAutoUpdate=true});
+  }
+  // Don't auto-select — user picks from Add list (keeps D-pad on the player)
+  refreshColliders();
+  refreshObjectList();
+  queueSave();
+}
+
+function refreshColliders(){
+  colliders.length=0;
+  collisionMeshes.length=0;
+  if(ground)collisionMeshes.push(ground);
+  for(const o of objects){
+    if(!o.visible||o.userData.solid===false)continue;
+    const b=new THREE.Box3().setFromObject(o);
+    const sx=b.max.x-b.min.x, sz=b.max.z-b.min.z;
+    const cx=(b.min.x+b.max.x)*.5, cz=(b.min.z+b.max.z)*.5;
+    colliders.push({o,c:{x:cx,z:cz},hx:sx/2+.02,hz:sz/2+.02});
+    collisionMeshes.push(o);
+  }
+}
+
+function refreshObjectList(){
+  const list=$("objectList");
+  if(!list)return;
+  list.innerHTML="";
+  if(!objects.length){
+    list.innerHTML='<div style="font-size:9px;color:var(--muted);padding:6px">No objects yet</div>';
+    return;
+  }
+  objects.forEach((o,i)=>{
+    const row=document.createElement("div");
+    row.className="item";
+    row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer;padding:7px 8px";
+    if(selected===o)row.style.borderColor="rgba(120,200,255,.85)";
+    const label=document.createElement("span");
+    label.style.cssText="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1";
+    const tag=o.userData.vehicle||isVehicle(o)?" 🚗":"";
+    label.textContent=`${i+1}. ${o.name||o.userData.type||"Object"}${tag}`;
+    const del=document.createElement("button");
+    del.className="close";
+    del.textContent="✕";
+    del.style.cssText="padding:4px 7px;font-size:9px;flex-shrink:0";
+    del.onclick=e=>{
+      e.stopPropagation();
+      selectObject(o);
+      deleteSelectedObject();
+    };
+    // Click again on selected row = deselect
+    row.onclick=()=>{
+      if(selected===o)selectObject(null);
+      else selectObject(o);
+    };
+    row.appendChild(label);
+    row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+function blocked(p,r,ignore){
+  for(const c of colliders){
+    if(c.o===ignore)continue;
+    const dx=Math.max(Math.abs(p.x-c.c.x)-c.hx,0);
+    const dz=Math.max(Math.abs(p.z-c.c.z)-c.hz,0);
+    if(dx*dx+dz*dz<r*r)return true;
+  }
+  return false;
+}
+function movePlayer(dx,dz){
+  if(!player)return;
+  const nx=player.position.x+dx;
+  const nz=player.position.z+dz;
+  if(Math.abs(nx)<worldSize/2-1 && !blocked(new THREE.Vector3(nx,player.position.y,player.position.z),.18,player))
+    player.position.x=nx;
+  if(Math.abs(nz)<worldSize/2-1 && !blocked(new THREE.Vector3(player.position.x,player.position.y,nz),.18,player))
+    player.position.z=nz;
+}
+
+/* ---------- animation: checklist → bottom action buttons (no menu bar) ---------- */
+const enabledAnimButtons=new Set(); // names shown next to Jump/Run
+
+// Walk / Run / Idle are driven by D-pad + Run — never list them as extra buttons
+function isLocomotionAnim(n){
+  return /^(.*\b)?(idle|stand|standing|walk|walking|run|running|jog|sprint|locomotion|t-?pose|neutral)(\b.*)?$/i.test(n);
+}
+
+function safeClip(c){
+  const clone=c.clone();
+  clone.tracks=clone.tracks.map(t=>{
+    if(!/\.position$/.test(t.name)) return t;
+    const n=t.name.toLowerCase();
+    if(!/(root|hips|mixamorig:hips|mixamorighips)/.test(n)) return t;
+    const tr=t.clone();
+    for(let i=0;i<tr.values.length;i+=3){
+      tr.values[i]=0;
+      tr.values[i+2]=0;
+    }
+    return tr;
+  });
+  return clone;
+}
+
+function shortAnimName(n){
+  let s=String(n||"anim")
+    .replace(/mixamorig[:_]?/ig,"")
+    .replace(/armature\|?/ig,"")
+    .replace(/[^a-zA-Z0-9]+/g," ")
+    .trim();
+  if(s.length>14)s=s.slice(0,13)+"…";
+  return s||"anim";
+}
+
+function findAction(regexes){
+  const names=Object.keys(actions);
+  for(const re of regexes){
+    const n=names.find(x=>re.test(x));
+    if(n)return n;
+  }
+  return null;
+}
+
+function playAction(name,loop=THREE.LoopOnce){
+  const a=actions[name];
+  if(!a)return;
+  if(currentAction===a&&a.isRunning())return;
+  if(currentAction&&currentAction!==a)currentAction.fadeOut(0.12);
+  a.reset();
+  a.setLoop(loop,loop===THREE.LoopOnce?1:Infinity);
+  a.clampWhenFinished=loop===THREE.LoopOnce;
+  a.enabled=true;
+  a.fadeIn(0.12).play();
+  currentAction=a;
+}
+
+function setupAnimations(gltf){
+  mixer=new THREE.AnimationMixer(playerVisual);
+  actions={};
+  currentAction=null;
+  enabledAnimButtons.clear();
+
+  for(const clip of gltf.animations||[]){
+    const n=(clip.name||"clip").trim();
+    if(!n)continue;
+    if(/^(car|vehicle|door|wheel|steer)\b/i.test(n))continue;
+    actions[n]=mixer.clipAction(safeClip(clip));
+  }
+
+  const idle=findAction([/^idle$/i,/idle/i,/^stand$/i,/standing/i,/t-?pose/i,/neutral/i]);
+  if(idle)playAction(idle);
+  else{
+    const safe=Object.keys(actions).find(n=>!/punch|attack|hit|death|fall/i.test(n));
+    if(safe)playAction(safe);
+  }
+
+  // Default extra buttons: action clips only (NOT walk/run/idle)
+  ["jump","wave","dance","sit","clap","cheer","yes","no","salute"].forEach(key=>{
+    const n=findAction([new RegExp(key,"i")]);
+    if(n&&!isLocomotionAnim(n))enabledAnimButtons.add(n);
+  });
+
+  buildAnimChecklist();
+  buildAnimationButtons();
+}
+
+function buildAnimChecklist(){
+  const box=$("animChecklist");
+  if(!box)return;
+  box.innerHTML="";
+  // Hide locomotion — already on D-pad / Run
+  const names=Object.keys(actions)
+    .filter(n=>!isLocomotionAnim(n))
+    .sort((a,b)=>a.localeCompare(b));
+  if(!names.length){
+    box.innerHTML='<div style="font-size:9px;color:var(--muted)">No extra animations (walk/run/idle are on movement controls)</div>';
+    return;
+  }
+  names.forEach(n=>{
+    const row=document.createElement("label");
+    row.style.cssText="display:flex;align-items:center;gap:8px;padding:7px 8px;border:1px solid var(--line2);border-radius:12px;background:rgba(255,255,255,.04);cursor:pointer";
+    const cb=document.createElement("input");
+    cb.type="checkbox";
+    cb.checked=enabledAnimButtons.has(n);
+    cb.style.accentColor="#fff";
+    const span=document.createElement("span");
+    span.style.cssText="font-size:10px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+    span.textContent=shortAnimName(n);
+    span.title=n;
+    cb.onchange=()=>{
+      if(cb.checked)enabledAnimButtons.add(n);
+      else enabledAnimButtons.delete(n);
+      buildAnimationButtons();
+    };
+    row.appendChild(cb);
+    row.appendChild(span);
+    span.onclick=e=>{
+      e.preventDefault();
+      playAction(n);
+      toast(shortAnimName(n));
+    };
+    box.appendChild(row);
+  });
+}
+
+function buildAnimationButtons(){
+  const bar=$("actions");
+  if(!bar)return;
+  // Remove previous dynamic anim buttons only
+  bar.querySelectorAll("button.anim-act").forEach(b=>b.remove());
+  const names=[...enabledAnimButtons].filter(n=>actions[n]&&!isLocomotionAnim(n));
+  names.forEach(n=>{
+    const b=document.createElement("button");
+    b.className="action anim-act";
+    b.textContent=shortAnimName(n);
+    b.title=n;
+    b.onpointerdown=e=>{
+      e.preventDefault();
+      playAction(n);
+    };
+    bar.appendChild(b);
+  });
+}
+
+/* ---------- Man wrapper: animations cannot move gameplay position ---------- */
+async function loadMan(){
+  const loader=new GLTFLoader();
+  try{
+    const gltf=await loader.loadAsync("./Man.glb");
+
+    if(player)root.remove(player);
+
+    player=new THREE.Group();
+    player.name="Man.glb";
+    player.userData={type:"Man",solid:true,player:true};
+
+    playerVisual=gltf.scene;
+    playerVisual.name="Man.glb";
+    player.add(playerVisual);
+
+    // AAA-style character lighting: soft, even, no spotlight circle
+    // Key from upper-front-side (like sky/sun bounce)
+    const manKey = new THREE.DirectionalLight(0xfff4ec, 0.5);
+    manKey.position.set(3.5, 5.0, 2.0);
+    manKey.name = "ManKey";
+    player.add(manKey);
+
+    // Soft sky/ground fill — main reason character reads in all conditions
+    const manFill = new THREE.HemisphereLight(0xe8eef8, 0x3a3a42, 0.7);
+    manFill.name = "ManFill";
+    player.add(manFill);
+
+    // Cool rim from behind for edge separation (not a spotlight)
+    const manRim = new THREE.DirectionalLight(0xc2d4ff, 0.35);
+    manRim.position.set(-3.0, 3.5, -4.0);
+    manRim.name = "ManRim";
+    player.add(manRim);
+
+    // Secondary soft fill from opposite side (kills harsh single-direction look)
+    const manSide = new THREE.DirectionalLight(0xfff0e8, 0.22);
+    manSide.position.set(-2.5, 2.0, 3.0);
+    manSide.name = "ManSide";
+    player.add(manSide);
+
+    playerVisual.traverse(o=>{
+      if(o.isMesh){
+        o.castShadow=true;
+        o.receiveShadow=true;
+        o.frustumCulled=true;
+
+        const mats=Array.isArray(o.material)?o.material:[o.material];
+        for(const m of mats){
+          if(!m)continue;
+          // Preserve the GLB exactly: no color/roughness/metalness changes.
+          // Man is NEVER treated as a mirror.
+          if("envMapIntensity" in m) m.envMapIntensity=1.0;
+          for(const key of ["map","normalMap","roughnessMap","metalnessMap","aoMap","emissiveMap"]){
+            const tex=m[key];
+            if(!tex)continue;
+            tex.minFilter=THREE.LinearMipmapLinearFilter;
+            tex.magFilter=THREE.LinearFilter;
+            tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+            tex.needsUpdate=true;
+          }
+          m.needsUpdate=true;
+        }
+      }
+    });
+
+    // Auto-normalize model so height ≈ 1.8 units, then manScale multiplies freely
+    const box=new THREE.Box3().setFromObject(playerVisual);
+    const rawH=Math.max(0.01,box.max.y-box.min.y);
+    manBaseHeight=rawH;
+    manBaseScale=1.8/rawH; // normalize to ~1.8m human height
+    player.scale.set(1,1,1);
+    playerVisual.scale.setScalar(manBaseScale*manScale);
+
+    player.position.set(0,groundY,0);
+    move.x=0; move.z=0; running=false; velocityY=0; grounded=true;
+    root.add(player);
+
+    /* Put the visual on the ground, but NEVER change player gameplay position. */
+    const vb=new THREE.Box3().setFromObject(playerVisual);
+    playerVisual.position.y=-vb.min.y;
+    manCurrentHeight=Math.max(0.01,vb.max.y-vb.min.y);
+
+    // Snap camera distance to new character size
+    cameraState.currentDistance=Math.max(manCurrentHeight*1.65,manCurrentHeight*3.1);
+    cameraState.zoom=0;
+
+    setupAnimations(gltf);
+    refreshColliders();
+    say("Man.glb ready");
+  }catch(e){
+    console.error(e);
+    player=new THREE.Group();
+    player.name="Man.glb";
+    player.userData={type:"Man",solid:true,player:true};
+    playerVisual=new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.3,1.1,6,10),
+      mat(0x888888,0.7)
+    );
+    playerVisual.position.y=0.85;
+    playerVisual.castShadow=true;
+    player.add(playerVisual);
+    root.add(player);
+    say("Man.glb failed to load");
+  }
+}
+
+/* ---------- Vehicle driving + selected-object D-pad control ---------- */
+let driving=false;
+let currentVehicle=null;
+const carState={
+  speed:0,
+  maxSpeed:28,
+  accel:18,
+  brake:32,
+  coast:6,
+  turnRate:1.9,
+  steer:0
+};
+
+function isVehicle(o){
+  if(!o)return false;
+  if(o.userData.vehicle)return true;
+  const t=(o.userData.type||o.name||"").toLowerCase();
+  return /car|vehicle|auto|truck|bike/.test(t);
+}
+
+function findNearestVehicle(maxDist=14){
+  let best=null,bestD=maxDist;
+  for(const o of objects){
+    if(!isVehicle(o))continue;
+    const d=o.position.distanceTo(player.position);
+    if(d<bestD){bestD=d;best=o}
+  }
+  return best;
+}
+
+// Independent car camera (like Man camera, but elevated + freer zoom)
+const carCam={
+  yaw:Math.PI,
+  pitch:0.42,
+  zoom:0,
+  distance:9,
+  height:3.2,
+  lookHeight:1.2,
+  smooth:new THREE.Vector3()
+};
+
+function enterVehicle(v){
+  if(!v||!player||driving)return;
+  driving=true;
+  currentVehicle=v;
+  v.userData.vehicle=true;
+  v.traverse(c=>{c.matrixAutoUpdate=true});
+  if(playerVisual)playerVisual.visible=false;
+  player.position.copy(v.position);
+  carState.speed=0;
+  carState.steer=0;
+  // Car camera starts elevated behind the vehicle
+  carCam.yaw=v.rotation.y+Math.PI;
+  carCam.pitch=0.42;
+  carCam.zoom=0;
+  carCam.distance=9;
+  carCam.smooth.copy(v.position);
+  carCam.smooth.y+=carCam.lookHeight;
+  selectObject(null); // no selection while driving
+  toast("Driving — steer with D-pad · pinch/wheel zoom · E exit");
+  say("Driving "+(v.name||"vehicle"));
+}
+
+function exitVehicle(){
+  if(!driving||!currentVehicle||!player)return;
+  const v=currentVehicle;
+  const side=new THREE.Vector3(1.8,0,0).applyAxisAngle(new THREE.Vector3(0,1,0),v.rotation.y);
+  player.position.copy(v.position).add(side);
+  player.position.y=groundY;
+  if(playerVisual)playerVisual.visible=true;
+  driving=false;
+  currentVehicle=null;
+  carState.speed=0;
+  cameraState.yaw=player.rotation.y+Math.PI;
+  cameraState.pitch=0.32;
+  cameraState.zoom=0;
+  const btn=$("driveAction");
+  if(btn)btn.textContent="Drive";
+  toast("Exited vehicle");
+  say("On foot");
+}
+
+function toggleDrive(){
+  if(driving){
+    exitVehicle();
+    const btn=$("driveAction");
+    if(btn)btn.textContent="Drive";
+    return;
+  }
+  let v=null;
+  if(selected&&isVehicle(selected))v=selected;
+  else v=findNearestVehicle();
+  if(!v){toast("No car nearby — select Car in list or stand closer");return}
+  enterVehicle(v);
+  const btn=$("driveAction");
+  if(btn)btn.textContent="Exit";
+}
+
+if($("driveBtn"))$("driveBtn").onclick=e=>{e.preventDefault();toggleDrive()};
+if($("driveAction"))$("driveAction").onpointerdown=e=>{e.preventDefault();toggleDrive()};
+if($("deselectBtn"))$("deselectBtn").onclick=()=>{selectObject(null);toast("Deselected")};
+addEventListener("keydown",e=>{
+  if(e.code==="KeyE"&&!e.repeat)toggleDrive();
+  if(e.code==="Escape"){selectObject(null);toast("Deselected")}
+});
+
+function updateVehicle(dt){
+  if(!driving||!currentVehicle)return;
+  const v=currentVehicle;
+
+  let throttle=0,steer=0;
+  if(keys.w||keys.ArrowUp||move.z<0)throttle+=1;
+  if(keys.s||keys.ArrowDown||move.z>0)throttle-=1;
+  if(keys.a||keys.ArrowLeft||move.x<0)steer+=1;
+  if(keys.d||keys.ArrowRight||move.x>0)steer-=1;
+
+  if(throttle>0)carState.speed+=carState.accel*dt*throttle;
+  else if(throttle<0)carState.speed+=carState.brake*dt*throttle;
+  else{
+    if(carState.speed>0)carState.speed=Math.max(0,carState.speed-carState.coast*dt);
+    else if(carState.speed<0)carState.speed=Math.min(0,carState.speed+carState.coast*dt);
+  }
+  carState.speed=THREE.MathUtils.clamp(carState.speed,-carState.maxSpeed*0.45,carState.maxSpeed);
+
+  const spd=Math.abs(carState.speed);
+  const steerFactor=spd<0.4?0:THREE.MathUtils.clamp(spd/carState.maxSpeed,0.2,1);
+  if(steer!==0&&spd>0.25){
+    const dir=Math.sign(carState.speed)||1;
+    v.rotation.y+=steer*carState.turnRate*steerFactor*dir*dt;
+  }
+
+  const forward=new THREE.Vector3(0,0,-1).applyAxisAngle(new THREE.Vector3(0,1,0),v.rotation.y);
+  v.position.addScaledVector(forward,carState.speed*dt);
+
+  const box=new THREE.Box3().setFromObject(v);
+  v.position.y+=groundY-box.min.y;
+
+  const limit=worldSize*0.5-2;
+  v.position.x=THREE.MathUtils.clamp(v.position.x,-limit,limit);
+  v.position.z=THREE.MathUtils.clamp(v.position.z,-limit,limit);
+
+  player.position.copy(v.position);
+  player.rotation.y=v.rotation.y;
+  v.updateMatrixWorld(true);
+}
+
+function updateCarCamera(dt){
+  if(!driving||!currentVehicle)return;
+  const v=currentVehicle;
+
+  // Target look point: slightly above car center
+  const look=v.position.clone();
+  look.y+=carCam.lookHeight;
+  carCam.smooth.lerp(look,1-Math.exp(-8*dt));
+
+  // Distance with user zoom (pinch / wheel still works via cameraState.zoom mapped here)
+  const dist=THREE.MathUtils.clamp(carCam.distance+carCam.zoom,4.5,22);
+
+  // Spherical offset — elevated chase cam
+  const cosP=Math.cos(carCam.pitch);
+  const sinP=Math.sin(carCam.pitch);
+  const sinY=Math.sin(carCam.yaw);
+  const cosY=Math.cos(carCam.yaw);
+  const offset=new THREE.Vector3(
+    sinY*cosP*dist,
+    Math.max(sinP*dist,carCam.height*0.55),
+    cosY*cosP*dist
+  );
+
+  const ideal=carCam.smooth.clone().add(offset);
+
+  // Soft collision
+  const dir=ideal.clone().sub(carCam.smooth).normalize();
+  cameraRaycaster.set(carCam.smooth,dir);
+  cameraRaycaster.far=dist;
+  const hits=cameraRaycaster.intersectObjects(collisionMeshes,true)
+    .filter(h=>h.object!==v&&!isPlayerObject(h.object)&&h.distance>0.4);
+  let d=dist;
+  if(hits.length)d=Math.max(hits[0].distance-0.5,3.5);
+
+  camera.position.copy(carCam.smooth).addScaledVector(dir,d);
+  // Never drop below a raised chase height
+  const minY=v.position.y+1.6;
+  if(camera.position.y<minY)camera.position.y=minY;
+  camera.lookAt(carCam.smooth);
+}
+
+function updateSelectedObject(dt){
+  // When an object is selected (not driving), D-pad moves/rotates it
+  if(driving||!selected||selected===player)return;
+  let ix=move.x,iz=move.z;
+  if(keys.w||keys.ArrowUp)iz-=1;
+  if(keys.s||keys.ArrowDown)iz+=1;
+  if(keys.a||keys.ArrowLeft)ix-=1;
+  if(keys.d||keys.ArrowRight)ix+=1;
+  if(!ix&&!iz)return;
+
+  // Unfreeze for movement
+  selected.traverse(c=>{c.matrixAutoUpdate=true});
+
+  const speed=(keys.Shift||running)?8:4;
+  // Camera-relative XZ
+  camera.getWorldDirection(camDirMove);
+  camDirMove.y=0;
+  if(camDirMove.lengthSq()<0.001)camDirMove.set(0,0,-1);
+  camDirMove.normalize();
+  camRight.crossVectors(camDirMove,cameraUp).normalize();
+
+  const delta=new THREE.Vector3();
+  if(iz<0)delta.add(camDirMove);
+  if(iz>0)delta.sub(camDirMove);
+  if(ix<0)delta.sub(camRight);
+  if(ix>0)delta.add(camRight);
+  if(delta.lengthSq()>0.001){
+    delta.normalize().multiplyScalar(speed*dt);
+    selected.position.x+=delta.x;
+    selected.position.z+=delta.z;
+    selected.updateMatrixWorld(true);
+    if(selectionHelper){
+      const box=new THREE.Box3().setFromObject(selected);
+      selectionHelper.box.copy(box);
+    }
+    queueSave();
+  }
+}
+
+/* ---------- Professional character controller ---------- */
+const moveDir=new THREE.Vector3();
+const camDirMove=new THREE.Vector3();
+const camRight=new THREE.Vector3();
+const bodyCenter=new THREE.Vector3();
+const nextPos=new THREE.Vector3();
+const rayOrigin=new THREE.Vector3();
+const downVector=new THREE.Vector3(0,-1,0);
+const finalMove=new THREE.Vector3();
+const velocityXZ=new THREE.Vector3();   // horizontal velocity for smooth accel
+const movementRaycaster=new THREE.Raycaster();
+
+const MOVE={
+  walkSpeed:4.8,
+  runSpeed:9.2,
+  accel:18,
+  decel:22,
+  rotateSpeed:10,
+  jumpForce:7.0,
+  gravity:22,
+  stepHeight:0.55,
+  playerRadius:0.28
+};
+
+function jump(){
+  if(!player||!grounded)return;
+  velocityY=MOVE.jumpForce;
+  grounded=false;
+  const j=findAction([/jump/i]);
+  if(j)playAction(j);
+}
+
+function updatePlayer(dt){
+  if(!player)return;
+  if(driving)return; // vehicle owns movement
+  // If object selected, D-pad controls the object instead of the player
+  if(selected&&selected!==player)return;
+
+  // --- Input ---
+  let ix=move.x, iz=move.z;
+  if(keys.w||keys.ArrowUp)iz-=1;
+  if(keys.s||keys.ArrowDown)iz+=1;
+  if(keys.a||keys.ArrowLeft)ix-=1;
+  if(keys.d||keys.ArrowRight)ix+=1;
+
+  ix=THREE.MathUtils.clamp(ix,-1,1);
+  iz=THREE.MathUtils.clamp(iz,-1,1);
+
+  const isMoving=Math.abs(ix)>0.01||Math.abs(iz)>0.01;
+  const isRunning=running||keys.Shift;
+
+  // Camera-relative direction
+  camera.getWorldDirection(camDirMove);
+  camDirMove.y=0;
+  if(camDirMove.lengthSq()<0.001)camDirMove.set(0,0,-1);
+  camDirMove.normalize();
+  camRight.crossVectors(camDirMove,cameraUp).normalize();
+
+  moveDir.set(0,0,0);
+  if(isMoving){
+    if(iz<0)moveDir.add(camDirMove);
+    if(iz>0)moveDir.sub(camDirMove);
+    if(ix<0)moveDir.sub(camRight);
+    if(ix>0)moveDir.add(camRight);
+    if(moveDir.lengthSq()>0.001)moveDir.normalize();
+  }
+
+  // --- Horizontal velocity with acceleration ---
+  const targetSpeed=isMoving?(isRunning?MOVE.runSpeed:MOVE.walkSpeed):0;
+  const desiredVel=moveDir.clone().multiplyScalar(targetSpeed);
+
+  if(isMoving){
+    velocityXZ.lerp(desiredVel,1-Math.exp(-MOVE.accel*dt));
+  }else{
+    velocityXZ.lerp(desiredVel,1-Math.exp(-MOVE.decel*dt));
+  }
+
+  // Scale collision & step with current character height
+  const charH=getCharacterHeight();
+  const radius=Math.max(0.15,charH*0.16);
+  const stepH=Math.max(0.25,charH*0.32);
+
+  // --- Collision + movement ---
+  if(velocityXZ.lengthSq()>0.0001){
+    finalMove.copy(velocityXZ).multiplyScalar(dt);
+
+    // World limits
+    const limit=worldSize*0.5-0.6;
+    nextPos.copy(player.position).add(finalMove);
+    if(Math.abs(nextPos.x)>limit){nextPos.x=player.position.x;velocityXZ.x=0;}
+    if(Math.abs(nextPos.z)>limit){nextPos.z=player.position.z;velocityXZ.z=0;}
+
+    // Forward collision (simple sliding)
+    bodyCenter.copy(player.position);
+    bodyCenter.y+=charH*0.5;
+
+    const moveLen=finalMove.length();
+    if(moveLen>0.001){
+      const dir=finalMove.clone().normalize();
+      movementRaycaster.set(bodyCenter,dir);
+      movementRaycaster.far=moveLen+radius+0.15;
+
+      const hits=movementRaycaster.intersectObjects(collisionMeshes,true)
+        .filter(h=>!isPlayerObject(h.object));
+
+      if(hits.length && hits[0].distance<moveLen+radius){
+        // Try slide along the wall
+        const hit=hits[0];
+        const normal=hit.face?hit.face.normal.clone():new THREE.Vector3(0,0,1);
+        const slide=finalMove.clone().projectOnPlane(normal);
+        nextPos.copy(player.position).add(slide);
+
+        if(Math.abs(nextPos.x)>limit)nextPos.x=player.position.x;
+        if(Math.abs(nextPos.z)>limit)nextPos.z=player.position.z;
+      }
+    }
+
+    // Step / ground height at new position
+    rayOrigin.set(nextPos.x,player.position.y+stepH+0.25,nextPos.z);
+    movementRaycaster.set(rayOrigin,downVector);
+    movementRaycaster.far=stepH+1.8;
+
+    const floorHits=movementRaycaster.intersectObjects(collisionMeshes,true)
+      .filter(h=>!isPlayerObject(h.object));
+
+    if(floorHits.length){
+      const hitY=floorHits[0].point.y;
+      const diff=hitY-player.position.y;
+      if(diff<=stepH && diff>-0.9){
+        player.position.x=nextPos.x;
+        player.position.z=nextPos.z;
+        player.position.y=THREE.MathUtils.lerp(player.position.y,hitY,0.35);
+      }
+    }else{
+      player.position.x=nextPos.x;
+      player.position.z=nextPos.z;
+    }
+
+    // Face movement direction
+    const targetAngle=Math.atan2(velocityXZ.x,velocityXZ.z);
+    let diff=targetAngle-player.rotation.y;
+    while(diff<-Math.PI)diff+=Math.PI*2;
+    while(diff>Math.PI)diff-=Math.PI*2;
+    player.rotation.y+=diff*Math.min(1,MOVE.rotateSpeed*dt);
+  }
+
+  // Locomotion anims only (walk/run/idle) — extra clips are manual bottom buttons
+  const speed=velocityXZ.length();
+  if(speed>0.8&&grounded){
+    const n=isRunning
+      ?findAction([/^run$/i,/run/i,/sprint/i])
+      :findAction([/^walk$/i,/walk/i,/jog/i,/locomotion/i]);
+    if(n)playAction(n,THREE.LoopRepeat);
+  }else if(grounded&&speed<0.15){
+    const idle=findAction([/^idle$/i,/idle/i,/stand/i]);
+    if(idle)playAction(idle,THREE.LoopRepeat);
+  }
+
+  // --- Vertical (gravity + ground) ---
+  velocityY-=MOVE.gravity*dt;
+  player.position.y+=velocityY*dt;
+
+  // Ground check (scales with character)
+  const checkH=Math.max(0.3,charH*0.25);
+  rayOrigin.set(player.position.x,player.position.y+checkH,player.position.z);
+  movementRaycaster.set(rayOrigin,downVector);
+  movementRaycaster.far=checkH+0.5;
+
+  const groundHits=movementRaycaster.intersectObjects(collisionMeshes,true)
+    .filter(h=>!isPlayerObject(h.object));
+
+  if(groundHits.length && velocityY<=0){
+    const gy=groundHits[0].point.y;
+    if(player.position.y<=gy+0.1){
+      player.position.y=gy;
+      velocityY=0;
+      grounded=true;
+    }
+  }else if(player.position.y<=groundY){
+    player.position.y=groundY;
+    velocityY=0;
+    grounded=true;
+  }else{
+    grounded=false;
+  }
+}
+
+/* ---------- Camera input: drag orbit + pinch/wheel zoom ---------- */
+function isElementInUI(target){
+  if(!target)return false;
+  return target!==canvas && !target.closest?.("#view");
+}
+
+let isDraggingCam=false;
+let prevTouchX=0,prevTouchY=0;
+let initialPinchDistance=null;
+
+addEventListener("pointerdown",e=>{
+  if(isElementInUI(e.target))return;
+  if(e.pointerType!=="touch"||e.isPrimary){
+    isDraggingCam=true;
+    prevTouchX=e.clientX;
+    prevTouchY=e.clientY;
+    if(canvas.setPointerCapture)try{canvas.setPointerCapture(e.pointerId)}catch(_){}
+  }
+});
+
+addEventListener("pointermove",e=>{
+  if(!isDraggingCam||!player||initialPinchDistance!==null)return;
+  const deltaX=e.clientX-prevTouchX;
+  const deltaY=e.clientY-prevTouchY;
+  if(driving){
+    carCam.yaw-=deltaX*0.004;
+    carCam.pitch+=deltaY*0.0035;
+    carCam.pitch=THREE.MathUtils.clamp(carCam.pitch,0.15,0.75);
+  }else{
+    cameraState.yaw-=deltaX*cameraState.sensitivity;
+    cameraState.pitch+=deltaY*cameraState.sensitivity;
+    cameraState.pitch=THREE.MathUtils.clamp(cameraState.pitch,0.18,0.85);
+  }
+  prevTouchX=e.clientX;
+  prevTouchY=e.clientY;
+});
+
+addEventListener("pointerup",e=>{
+  isDraggingCam=false;
+  if(canvas.releasePointerCapture)try{canvas.releasePointerCapture(e.pointerId)}catch(_){}
+});
+addEventListener("pointercancel",()=>{isDraggingCam=false});
+
+addEventListener("touchstart",e=>{
+  if(isElementInUI(e.target))return;
+  if(e.touches.length===2){
+    isDraggingCam=false;
+    initialPinchDistance=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+  }
+},{passive:true});
+
+addEventListener("touchmove",e=>{
+  if(isElementInUI(e.target))return;
+  if(e.touches.length===2&&initialPinchDistance!==null){
+    const currentDistance=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+    const delta=(initialPinchDistance-currentDistance)*0.012;
+    if(driving){
+      carCam.zoom=THREE.MathUtils.clamp(carCam.zoom+delta,-4,12);
+    }else{
+      cameraState.zoom=THREE.MathUtils.clamp(cameraState.zoom+delta,-2.0,10);
+    }
+    initialPinchDistance=currentDistance;
+  }
+},{passive:true});
+
+addEventListener("touchend",e=>{
+  if(e.touches.length<2)initialPinchDistance=null;
+},{passive:true});
+
+addEventListener("wheel",e=>{
+  if(isElementInUI(e.target)||!player)return;
+  if(driving){
+    carCam.zoom=THREE.MathUtils.clamp(carCam.zoom+e.deltaY*0.01,-4,12);
+  }else{
+    cameraState.zoom=THREE.MathUtils.clamp(cameraState.zoom+e.deltaY*0.006,-2.0,10);
+  }
+},{passive:true});
+
+/* ---------- selection ---------- */
+let selectionHelper=null;
+function selectObject(o){
+  selected=o;
+  if(!o){
+    $("selection").style.display="none";
+    if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+    refreshObjectList();
+    return;
+  }
+  $("selection").textContent=o.name||o.userData.type||"Object";
+  $("selection").style.display="block";
+  // Lightweight selection box
+  if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+  const box=new THREE.Box3().setFromObject(o);
+  if(!box.isEmpty()){
+    selectionHelper=new THREE.Box3Helper(box,0x88ccff);
+    selectionHelper.material.depthTest=false;
+    selectionHelper.renderOrder=999;
+    scene.add(selectionHelper);
+  }
+  refreshObjectList();
+}
+// Selection only from Add panel object list — no accidental 3D click select
+
+/* ---------- controls ---------- */
+function bindMove(id,x,z){
+  const el=$(id);
+  const on=e=>{
+    e.preventDefault();
+    if(el.setPointerCapture)try{el.setPointerCapture(e.pointerId)}catch(_){}
+    move.x=x; move.z=z;
+  };
+  const off=e=>{
+    e.preventDefault();
+    move.x=0; move.z=0;
+    if(el.releasePointerCapture)try{el.releasePointerCapture(e.pointerId)}catch(_){}
+  };
+  el.addEventListener("pointerdown",on);
+  ["pointerup","pointercancel","lostpointercapture"].forEach(t=>el.addEventListener(t,off));
+}
+bindMove("moveF",0,-1);
+bindMove("moveB",0,1);
+bindMove("moveL",-1,0);
+bindMove("moveR",1,0);
+
+$("jump").onpointerdown=e=>{e.preventDefault();jump()};
+$("run").onpointerdown=e=>{e.preventDefault();running=true};
+["pointerup","pointercancel","pointerleave"].forEach(t=>$("run").addEventListener(t,()=>running=false));
+
+addEventListener("keydown",e=>{
+  keys[e.key]=true;
+  if(e.code==="Space")jump();
+  if(e.key==="Shift")running=true;
+});
+addEventListener("keyup",e=>{
+  keys[e.key]=false;
+  if(e.key==="Shift")running=false;
+});
+addEventListener("keydown",e=>{if(e.key==="Delete"||e.key==="Backspace")$("delete").click()});
+
+/* ---------- panels ---------- */
+function openPanel(id){
+  ["worldPanel","addPanel","animPanel"].forEach(x=>{
+    const el=$(x);
+    if(el)el.classList.remove("open");
+  });
+  const p=$(id);
+  if(p)p.classList.add("open");
+}
+$("worldBtn").onclick=()=>openPanel("worldPanel");
+$("addBtn").onclick=()=>openPanel("addPanel");
+$("animBtn").onclick=()=>{
+  openPanel("animPanel");
+  buildAnimChecklist();
+};
+$("pause").onclick=()=>{
+  paused=!paused;
+  $("pause").textContent=paused?"Play":"Pause";
+  say(paused?"Simulation paused":"Simulation running");
+};
+document.querySelectorAll("[data-close]").forEach(b=>
+  b.onclick=()=>$(b.dataset.close).classList.remove("open")
+);
+if($("animSelectAll"))$("animSelectAll").onclick=()=>{
+  enabledAnimButtons.clear();
+  // Action clips only — walk/run/idle stay on D-pad & Run
+  ["jump","wave","dance","sit","clap","cheer","yes","no","salute","kick","punch"].forEach(key=>{
+    const n=findAction([new RegExp(key,"i")]);
+    if(n&&!isLocomotionAnim(n))enabledAnimButtons.add(n);
+  });
+  if(!enabledAnimButtons.size){
+    Object.keys(actions).filter(n=>!isLocomotionAnim(n)).slice(0,6)
+      .forEach(n=>enabledAnimButtons.add(n));
+  }
+  buildAnimChecklist();
+  buildAnimationButtons();
+};
+if($("animClearAll"))$("animClearAll").onclick=()=>{
+  enabledAnimButtons.clear();
+  buildAnimChecklist();
+  buildAnimationButtons();
+};
+
+/* ---------- procedural add ---------- */
+document.querySelectorAll("[data-type]").forEach(b=>b.onclick=async()=>{
+  const t=b.dataset.type;
+  if(t==="Man"){toast("Man is already active");return}
+  if(t==="Girl"){await loadAssetGLB("./girl.glb","Girl","Girl");return}
+  if(t==="Home"){await loadAssetGLB("./Home.glb","Home","Home");return}
+  if(t==="Car"){await loadAssetGLB("./Car.glb","Car","Car");return}
+});
+
+/* ---------- transform / delete ---------- */
+function afterTransform(){
+  if(!selected)return;
+  selected.updateMatrixWorld(true);
+  selected.traverse(c=>{c.matrixAutoUpdate=true});
+  if(selectionHelper){
+    scene.remove(selectionHelper);
+    selectionHelper=null;
+    const box=new THREE.Box3().setFromObject(selected);
+    if(!box.isEmpty()){
+      selectionHelper=new THREE.Box3Helper(box,0x88ccff);
+      selectionHelper.material.depthTest=false;
+      selectionHelper.renderOrder=999;
+      scene.add(selectionHelper);
+    }
+  }
+  refreshColliders();
+  queueSave();
+}
+$("rotL").onclick=()=>{if(selected){selected.rotation.y-=Math.PI/12;afterTransform()}};
+$("rotR").onclick=()=>{if(selected){selected.rotation.y+=Math.PI/12;afterTransform()}};
+$("raise").onclick=()=>{if(selected){selected.position.y+=.25;afterTransform()}};
+$("lower").onclick=()=>{if(selected){selected.position.y-=.25;afterTransform()}};
+if($("scaleMinus"))$("scaleMinus").onclick=()=>{
+  if(!selected||selected===player)return toast("Select an object first");
+  selected.scale.multiplyScalar(0.9);
+  afterTransform();
+};
+if($("scalePlus"))$("scalePlus").onclick=()=>{
+  if(!selected||selected===player)return toast("Select an object first");
+  selected.scale.multiplyScalar(1.12);
+  afterTransform();
+};
+
+function deleteSelectedObject(){
+  if(!selected)return toast("Select an object first");
+  if(selected===player)return toast("Man cannot be deleted");
+  const name=selected.name||"Object";
+  const i=objects.indexOf(selected);
+  if(i>=0)objects.splice(i,1);
+  disposeObject(selected);
+  selected=null;
+  if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+  $("selection").style.display="none";
+  refreshColliders();
+  refreshObjectList();
+  queueSave();
+  toast("Deleted "+name);
+}
+$("delete").onclick=deleteSelectedObject;
+if($("deleteSelected"))$("deleteSelected").onclick=deleteSelectedObject;
+if($("deleteAllObjs"))$("deleteAllObjs").onclick=()=>{
+  if(!objects.length)return toast("Nothing to delete");
+  for(const o of [...objects])disposeObject(o);
+  objects.length=0;
+  selected=null;
+  if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+  $("selection").style.display="none";
+  refreshColliders();
+  refreshObjectList();
+  queueSave();
+  toast("All objects deleted");
+};
+
+/* ---------- external model import (queued, multi-file, smooth) ---------- */
+const fileUrls=new Map();
+const manager=new THREE.LoadingManager();
+manager.setURLModifier(url=>{
+  const key=url.split("/").pop().split("?")[0];
+  return fileUrls.get(key)||url;
+});
+const importLoader=new GLTFLoader(manager);
+let importBusy=false;
+
+async function importOneFile(file, sharedUrls, customName){
+  const gltf=await importLoader.loadAsync(sharedUrls.get(file.name)||URL.createObjectURL(file));
+  const o=gltf.scene;
+  const low=file.name.toLowerCase();
+  let type="Object";
+  if(/car|vehicle/.test(low))type="Car";
+  else if(/home|house|building/.test(low))type="Home";
+  else if(/girl|woman|female/.test(low))type="Girl";
+  else if(/man|male|character/.test(low))type="Man";
+  else if(/mirror|glass/.test(low))type="Mirror";
+
+  o.userData={
+    type,
+    solid:true,
+    imported:true,
+    vehicle:type==="Car"||/car|vehicle/i.test(type+file.name)
+  };
+  o.name=customName||file.name.replace(/\.(glb|gltf)$/i,"");
+  optimizeImportedModel(o);
+  // If this is a Home (or contains Mirror nodes), promote named "Mirror" parts only
+  if(type==="Home"||/mirror/i.test(low)){
+    prepareHomeMirrors(o);
+    mirrorNeedsUpdate=true;
+    updateLightMirrors(true);
+  }
+  // Drop unused animations on static props (saves CPU)
+  if(gltf.animations&&gltf.animations.length&&!/character|man|girl|person|npc/i.test(low)){
+    // keep clips only if clearly a character; otherwise ignore
+  }
+  place(o,o.name);
+  return o;
+}
+
+$("importModel").onclick=async()=>{
+  if(importBusy)return toast("Import already running…");
+  const fs=[...$("modelFiles").files];
+  if(!fs.length)return toast("Choose a GLB or GLTF file");
+
+  const models=fs.filter(f=>/\.(glb|gltf)$/i.test(f.name));
+  if(!models.length)return toast("Choose GLB or GLTF");
+
+  importBusy=true;
+  const status=$("importStatus");
+  fileUrls.clear();
+  const blobList=[];
+  fs.forEach(f=>{
+    const u=URL.createObjectURL(f);
+    blobList.push(u);
+    fileUrls.set(f.name,u);
+  });
+
+  const baseName=$("objectName").value.trim();
+  let done=0;
+  try{
+    for(const file of models){
+      if(status)status.textContent=`Loading ${done+1}/${models.length}: ${file.name}`;
+      say(`Loading ${file.name}…`);
+      // Yield to main thread between files so UI stays smooth
+      await new Promise(r=>setTimeout(r,30));
+      try{
+        const name=models.length===1&&baseName?baseName:undefined;
+        await importOneFile(file,fileUrls,name);
+        done++;
+      }catch(err){
+        console.error(err);
+        toast("Failed: "+file.name);
+      }
+    }
+    if(status)status.textContent=done?`Imported ${done} model(s)`:"Import finished with errors";
+    toast(done?`Imported ${done} model(s)`:"Import failed");
+  }finally{
+    importBusy=false;
+    // Revoke blobs after a short delay (loader may still read)
+    setTimeout(()=>{blobList.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});fileUrls.clear()},5000);
+  }
+};
+
+/* ---------- live world controls ---------- */
+function range(id,fn){$(id).oninput=e=>fn(+e.target.value)}
+range("day",v=>{env.day=v;applyEnvironment();queueSave()});
+range("sunAngle",v=>{env.angle=v;applyEnvironment();queueSave()});
+range("skySat",v=>{env.skySat=v;applyEnvironment();queueSave()});
+$("groundColor").oninput=e=>{env.groundColor=e.target.value;applyEnvironment();queueSave()};
+range("groundBright",v=>{env.groundBright=v;applyEnvironment();queueSave()});
+range("charFront",v=>{env.charFront=v;applyEnvironment();queueSave()});
+range("charBack",v=>{env.charBack=v;applyEnvironment();queueSave()});
+range("charFill",v=>{env.charFill=v;applyEnvironment();queueSave()});
+range("groundSize",v=>{worldSize=v;rebuildGround();refreshColliders();applyEnvironment();queueSave()});
+range("groundHeight",v=>{
+  groundY=v;
+  if(ground)ground.position.y=v;
+  if(player)player.position.y=v;
+  objects.forEach(o=>{fitToGround(o)});
+  refreshColliders();
+  queueSave();
+});
+range("fog",v=>{env.fog=v;applyEnvironment();queueSave()});
+range("light",v=>{env.light=v;applyEnvironment();queueSave()});
+function updateManScaleUI(){
+  const v=$("manScaleValue");
+  if(v)v.textContent=manScale.toFixed(4);
+}
+function applyManScale(){
+  // No limits at all — scale can go to any positive value
+  manScale=Math.max(0.0001,Number(manScale.toFixed(5)));
+  if(playerVisual){
+    playerVisual.scale.setScalar(manBaseScale*manScale);
+    const vb=new THREE.Box3().setFromObject(playerVisual);
+    playerVisual.position.y=-vb.min.y;
+    // Update live height for camera
+    manCurrentHeight=Math.max(0.01,vb.max.y-vb.min.y);
+  }
+  // Reset camera distance so it re-adapts immediately to new size
+  if(cameraState){
+    const h=getCharacterHeight();
+    cameraState.currentDistance=Math.max(h*1.65,h*3.1);
+    cameraState.zoom=0;
+  }
+  updateManScaleUI();
+  queueSave();
+}
+$("manScaleMinus").onclick=()=>{
+  // Dynamic step: bigger when scale is large, finer when small
+  const step=Math.max(0.0005,manScale*0.08);
+  manScale=Math.max(0.0001,manScale-step);
+  applyManScale();
+};
+$("manScalePlus").onclick=()=>{
+  const step=Math.max(0.0005,manScale*0.08);
+  manScale=manScale+step;
+  applyManScale();
+};
+
+/* ---------- IndexedDB persistent world: queued, scalable, crash-safe ---------- */
+const DB_NAME="liquid_glass_world_v7";
+const DB_VER=2;
+let dbPromise=null,saveTimer=0,saveBusy=false,saveAgain=false;
+function dbOpen(){
+  if(dbPromise)return dbPromise;
+  dbPromise=new Promise((resolve,reject)=>{
+    const r=indexedDB.open(DB_NAME,DB_VER);
+    r.onupgradeneeded=()=>{
+      const db=r.result;
+      if(!db.objectStoreNames.contains("world"))db.createObjectStore("world");
+      if(!db.objectStoreNames.contains("objects"))db.createObjectStore("objects",{keyPath:"id",autoIncrement:true});
+    };
+    r.onsuccess=()=>resolve(r.result);
+    r.onerror=()=>{dbPromise=null;reject(r.error)};
+  });
+  return dbPromise;
+}
+function snapshot(){
+  return objects.map((o,i)=>({id:i+1,name:o.name,type:o.userData.type||"Object",pos:o.position.toArray(),rot:[o.rotation.x,o.rotation.y,o.rotation.z],scale:o.scale.toArray()}));
+}
+function queueSave(){
+  clearTimeout(saveTimer); saveTimer=setTimeout(saveState,140);
+}
+async function saveState(){
+  if(saveBusy){saveAgain=true;return}
+  saveBusy=true;
+  try{
+    const db=await dbOpen();
+    const tx=db.transaction(["world","objects"],"readwrite");
+    tx.objectStore("world").put({version:7,env:{...env},worldSize,groundY,manScale},"settings");
+    const os=tx.objectStore("objects"); os.clear();
+    for(const d of snapshot())os.put(d);
+    await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
+  }catch(e){console.warn("Save failed",e)}
+  finally{saveBusy=false;if(saveAgain){saveAgain=false;queueSave()}}
+}
+async function restoreState(){
+  try{
+    const db=await dbOpen();
+    const tx=db.transaction(["world","objects"],"readonly");
+    const settingsReq=tx.objectStore("world").get("settings");
+    const allReq=tx.objectStore("objects").getAll();
+    await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
+    const settings=settingsReq.result;
+    if(settings?.env){
+      Object.assign(env,settings.env);
+      $("day").value=env.day;
+      $("sunAngle").value=env.angle;
+      $("skySat").value=env.skySat;
+      $("groundColor").value=env.groundColor;
+      $("groundBright").value=env.groundBright;
+      $("fog").value=env.fog;
+      $("light").value=env.light;
+      if($("charFront"))$("charFront").value=env.charFront??0.55;
+      if($("charBack"))$("charBack").value=env.charBack??0.55;
+      if($("charFill"))$("charFill").value=env.charFill??0.7;
+    }
+    if(settings?.worldSize){worldSize=settings.worldSize;$("groundSize").value=worldSize;rebuildGround()}
+    if(typeof settings?.groundY==="number"){groundY=settings.groundY;$("groundHeight").value=groundY;ground.position.y=groundY}
+    if(typeof settings?.manScale==="number"){manScale=Math.max(0.0001,settings.manScale);updateManScaleUI();if(playerVisual)applyManScale()}
+    for(const d of (allReq.result||[])){
+      let o=null;
+      // Girl/Home/Car restored from GLB paths when available
+      if(d.type==="Girl"||d.type==="Home"||d.type==="Car"){
+        const path=d.type==="Girl"?"./girl.glb":d.type==="Home"?"./Home.glb":"./Car.glb";
+        loadAssetGLB(path,d.type,d.name,{skipPlace:true}).then(obj=>{
+          if(!obj)return;
+          obj.position.fromArray(d.pos);
+          obj.rotation.set(...d.rot);
+          obj.scale.fromArray(d.scale);
+          obj.updateMatrixWorld(true);
+          refreshColliders();
+          refreshObjectList();
+        });
+      }
+    }
+    applyEnvironment();refreshColliders();refreshObjectList();
+  }catch(e){console.warn("Restore failed",e)}
+}
+$("clearSave").onclick=async()=>{
+  try{
+    const db=await dbOpen();
+    const tx=db.transaction(["world","objects"],"readwrite");
+    tx.objectStore("world").clear();tx.objectStore("objects").clear();
+    await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
+    for(const o of [...objects])disposeObject(o);
+    objects.length=0;selected=null;
+    if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+    $("selection").style.display="none";
+    refreshColliders();refreshObjectList();
+    toast("World storage cleared");
+  }catch(e){toast("Storage reset failed")}
+};
+
+/* ---------- startup ---------- */
+updateManScaleUI();
+loadMan();
+restoreState();
+
+addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight,false);
+});
+
+const clock=new THREE.Clock();
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),.033);
+
+  if(!paused){
+    if(driving){
+      updateVehicle(dt);
+      updateCarCamera(dt);
+    }else if(selected&&selected!==player){
+      updateSelectedObject(dt);
+      updateFollowCamera(dt);
+    }else{
+      updatePlayer(dt);
+      updateFollowCamera(dt);
+    }
+    if(mixer&&!driving)mixer.update(dt);
+  }
+
+  updateLightMirrors();
+  renderer.render(scene,camera);
+}
+frame();
+</script>
+</body>
+</html>
