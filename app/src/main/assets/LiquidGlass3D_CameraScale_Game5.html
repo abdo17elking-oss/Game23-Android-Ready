@@ -1,0 +1,2765 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Liquid Glass 3D World — Professional Home Mirrors</title>
+<style>
+:root{
+  --glass:rgba(12,16,22,.22);
+  --glass2:rgba(255,255,255,.06);
+  --text:#fff;
+  --muted:rgba(255,255,255,.55);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  outline:none!important;border:none!important;box-shadow:none!important}
+input,textarea{ -webkit-user-select:text;user-select:text }
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:var(--text);
+font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#ui{position:fixed;inset:0;pointer-events:none}
+
+.control,.action,.topbtn,.item,.chip,.close,button{
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
+
+/* Soft transparent glass — no borders, no shadows, light blur only */
+.glass{
+  background:rgba(255,255,255,.07);
+  border:0!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+.panel.glass,.glass.panel{
+  background:rgba(10,14,20,.28);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+button{font:inherit;color:#fff;background:transparent;cursor:pointer}
+
+#status{
+  position:absolute;left:12px;top:calc(env(safe-area-inset-top) + 10px);
+  max-width:46vw;padding:8px 12px;border-radius:14px;font-size:10px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:rgba(255,255,255,.07);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:0;box-shadow:none
+}
+#top{
+  position:absolute;right:12px;top:calc(env(safe-area-inset-top) + 10px);
+  display:flex;gap:6px;pointer-events:auto
+}
+.topbtn{
+  min-width:42px;height:33px;padding:0 10px;border-radius:16px;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  font-size:10px;border:0;box-shadow:none
+}
+.topbtn:active,.control:active,.action:active,.item:active,.chip:active{
+  transform:scale(.96);background:rgba(255,255,255,.16)
+}
+
+#dpad{
+  position:absolute;left:13px;bottom:calc(env(safe-area-inset-bottom) + 15px);
+  width:142px;height:142px;pointer-events:auto
+}
+.control{
+  position:absolute;width:44px;height:44px;border-radius:14px;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  padding:0;border:0;box-shadow:none;
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+  text-shadow:0 1px 6px rgba(0,0,0,.25)
+}
+#moveF{left:49px;top:0}#moveL{left:0;top:49px}#moveB{left:49px;top:98px}#moveR{right:0;top:49px}
+
+#actions{
+  position:absolute;right:13px;bottom:calc(env(safe-area-inset-bottom) + 15px);
+  display:flex;flex-wrap:wrap;gap:6px;pointer-events:auto;
+  max-width:min(280px,52vw);justify-content:flex-end
+}
+.action{
+  min-width:56px;height:42px;padding:0 10px;border-radius:18px;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  font-size:10px;border:0;box-shadow:none
+}
+.action.anim-act{
+  min-width:auto;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+
+.panel{
+  position:absolute;right:12px;top:57px;width:min(370px,calc(100vw - 24px));
+  max-height:calc(100vh - 72px);overflow:auto;padding:15px;border-radius:22px;
+  pointer-events:auto;display:none;
+  background:rgba(10,14,20,.30);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:0!important;box-shadow:none!important
+}
+.panel.open{display:block}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.title{font-size:14px;font-weight:650}.sub{font-size:9px;color:var(--muted);margin-top:3px}
+.close{
+  background:rgba(255,255,255,.08);color:var(--muted);font-size:9px;
+  padding:6px 10px;border-radius:14px;border:0;box-shadow:none
+}
+.section{margin-top:13px;padding-top:12px;border-top:0}
+.section:first-of-type{margin-top:0;padding-top:0}
+.row{display:grid;grid-template-columns:1fr 48%;gap:10px;align-items:center;padding:8px 0}
+.row span{font-size:10px}.row small{display:block;color:var(--muted);font-size:8px;margin-top:2px}
+input[type=range]{width:100%;accent-color:#fff;border:0;box-shadow:none}
+input[type=color]{
+  width:100%;height:28px;border:0!important;border-radius:10px;
+  background:rgba(255,255,255,.06);padding:2px;box-shadow:none
+}
+input[type=text],input[type=file]{
+  width:100%;padding:8px 10px;border:0!important;border-radius:12px;
+  background:rgba(255,255,255,.07);color:#fff;font-size:10px;box-shadow:none
+}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.item{
+  border:0!important;border-radius:14px;padding:9px 8px;
+  background:rgba(255,255,255,.07);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  box-shadow:none!important;font-size:10px
+}
+
+#selection{
+  position:absolute;display:none;transform:translate(-50%,-110%);padding:6px 10px;
+  border-radius:12px;font-size:9px;white-space:nowrap;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:0;box-shadow:none
+}
+#toast{
+  position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 76px);
+  transform:translateX(-50%);padding:8px 12px;border-radius:12px;font-size:9px;
+  opacity:0;transition:.2s;white-space:nowrap;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:0;box-shadow:none
+}
+#toast.show{opacity:1}
+
+@media(max-width:430px){
+  #top{gap:5px}.topbtn{min-width:39px;padding:0 8px}
+  #actions{gap:5px}.action{min-width:52px;padding:0 8px}
+}
+
+/* Kill any leftover outlines / rings */
+*,*::before,*::after{outline:none!important;-webkit-tap-highlight-color:transparent}
+button:focus,input:focus,select:focus,textarea:focus,a:focus{
+  outline:none!important;box-shadow:none!important;border:0!important
+}
+
+/* ---- Splash / loading screen ---- */
+#splash{
+  position:fixed;inset:0;z-index:100000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 40%, rgba(30,45,70,.92), rgba(8,10,14,.97));
+  pointer-events:auto;
+  transition:opacity .45s ease, visibility .45s ease;
+}
+#splash.hide{
+  opacity:0;visibility:hidden;pointer-events:none;
+}
+#splash .splash-title{
+  font-size:clamp(18px,4.5vw,28px);font-weight:650;letter-spacing:.02em;
+  text-align:center;margin:0 20px 8px;color:#fff;
+  text-shadow:0 2px 24px rgba(0,0,0,.35);
+}
+#splash .splash-sub{
+  font-size:clamp(11px,2.8vw,14px);color:rgba(255,255,255,.55);
+  margin:0 20px 28px;text-align:center;
+}
+#splash .splash-bar-wrap{
+  width:min(280px,70vw);height:4px;border-radius:4px;
+  background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:14px;
+}
+#splash .splash-bar{
+  height:100%;width:0%;border-radius:4px;
+  background:linear-gradient(90deg,rgba(140,190,255,.9),rgba(255,255,255,.85));
+  transition:width .25s ease;
+}
+#splash .splash-status{
+  font-size:10px;color:rgba(255,255,255,.45);margin-bottom:22px;
+  min-height:14px;text-align:center;
+}
+#splash #playBtn{
+  min-width:140px;height:46px;padding:0 28px;border-radius:24px;
+  font-size:15px;font-weight:650;letter-spacing:.04em;
+  color:#fff;cursor:pointer;
+  background:rgba(255,255,255,.12);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:0;box-shadow:none;
+  opacity:.35;pointer-events:none;
+  transition:opacity .3s, background .2s, transform .15s;
+}
+#splash #playBtn.ready{
+  opacity:1;pointer-events:auto;
+  background:rgba(120,170,255,.28);
+}
+#splash #playBtn.ready:active{transform:scale(.96);background:rgba(140,190,255,.4)}
+#ui.hidden-boot{visibility:hidden;pointer-events:none}
+
+/* Pause dialog — pure transparent glass, no colors */
+#pauseDialog{
+  position:fixed;inset:0;z-index:90000;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.28);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  pointer-events:auto;
+}
+#pauseDialog.open{display:flex}
+#pauseDialog .pause-card{
+  width:min(260px,78vw);
+  padding:26px 22px 20px;
+  border-radius:24px;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  display:flex;flex-direction:column;gap:8px;align-items:stretch;
+  border:0;box-shadow:none;
+}
+#pauseDialog .pause-title{
+  font-size:13px;font-weight:600;text-align:center;
+  margin:0 0 10px;letter-spacing:.06em;
+  color:rgba(255,255,255,.78);
+  text-transform:uppercase;
+}
+#pauseDialog .pause-btn{
+  height:46px;border-radius:16px;font-size:14px;font-weight:550;
+  color:rgba(255,255,255,.92);cursor:pointer;
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:rgba(255,255,255,.07);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  letter-spacing:.03em;
+  transition:background .15s, transform .12s;
+}
+#pauseDialog .pause-btn:active{
+  transform:scale(.97);
+  background:rgba(255,255,255,.16);
+}
+#pauseDialog .pause-btn.exit,
+#pauseDialog .pause-btn.menu,
+#pauseDialog .pause-btn.home{
+  background:rgba(255,255,255,.07);
+}
+#pauseDialog .pause-btn.resume{
+  margin-top:6px;
+  height:40px;
+  font-size:12px;font-weight:500;
+  color:rgba(255,255,255,.55);
+  background:rgba(255,255,255,.04);
+}
+#driveAction{display:none}
+#driveAction.show-drive{display:inline-flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="splash">
+  <div class="splash-title">أهلاً بكم في لعبة AB Open World</div>
+  <div class="splash-sub">Welcome to AB Open World</div>
+  <div class="splash-bar-wrap"><div class="splash-bar" id="splashBar"></div></div>
+  <div class="splash-status" id="splashStatus">جاري التحميل…</div>
+  <button id="playBtn" type="button">Play</button>
+</div>
+
+<div id="pauseDialog">
+  <div class="pause-card">
+    <div class="pause-title">Paused</div>
+    <button type="button" class="pause-btn menu" id="pauseMenu">Menu</button>
+    <button type="button" class="pause-btn home" id="pauseHome">Home</button>
+    <button type="button" class="pause-btn exit" id="pauseExit">Exit</button>
+    <button type="button" class="pause-btn resume" id="pauseResume">Resume</button>
+  </div>
+</div>
+
+<div id="ui" class="hidden-boot">
+  <div id="status" class="glass">World ready</div>
+
+  <div id="top">
+    <button id="pause" class="topbtn">Pause</button>
+    <button id="animBtn" class="topbtn">Anim</button>
+    <button id="addBtn" class="topbtn">Add</button>
+    <button id="worldBtn" class="topbtn">World</button>
+  </div>
+
+  <div id="dpad">
+    <button id="moveF" class="control" aria-label="Move forward">UP</button>
+    <button id="moveL" class="control" aria-label="Move left">LT</button>
+    <button id="moveB" class="control" aria-label="Move backward">DN</button>
+    <button id="moveR" class="control" aria-label="Move right">RT</button>
+  </div>
+
+  <div id="actions">
+    <button id="jump" class="action">Jump</button>
+    <button id="run" class="action">Run</button>
+    <button id="driveAction" class="action">Drive</button>
+  </div>
+
+  <div id="selection" class="glass"></div>
+  <div id="toast" class="glass"></div>
+
+  <section id="animPanel" class="panel glass">
+    <div class="head">
+      <div>
+        <div class="title">Animations</div>
+        <div class="sub">✓ = show as button next to Jump / Run</div>
+      </div>
+      <button class="close" data-close="animPanel">Close</button>
+    </div>
+    <div class="section" style="padding-top:0">
+      <div id="animChecklist" style="display:flex;flex-direction:column;gap:6px;max-height:min(55vh,420px);overflow:auto"></div>
+    </div>
+    <div class="section">
+      <button id="animSelectAll" class="item" style="width:100%;margin-bottom:6px">Select action defaults</button>
+      <button id="animClearAll" class="item" style="width:100%">Clear extra buttons</button>
+    </div>
+</section>
+
+  <section id="worldPanel" class="panel glass">
+    <div class="head">
+      <div><div class="title">World</div><div class="sub">Live environment controls</div></div>
+      <button class="close" data-close="worldPanel">Close</button>
+    </div>
+
+    <div class="section">
+      <div class="row"><span>Time of day<small>0 midnight · 0.25 sunrise · 0.5 noon · 0.75 sunset</small></span><input id="day" type="range" min="0" max="1" step=".001" value=".62"></div>
+      <div class="row"><span>Sun direction<small>Rotate the whole day arc</small></span><input id="sunAngle" type="range" min="0" max="6.283" step=".001" value="3.8"></div>
+      <div class="row"><span>Sky saturation</span><input id="skySat" type="range" min="0" max="1" step=".001" value=".65"></div>
+    </div>
+
+    <div class="section">
+<div class="row"><span>Fog / horizon blend</span><input id="fog" type="range" min="0" max="1" step=".001" value=".35"></div>
+    </div>
+
+    <div class="section">
+      <div class="row"><span>World lighting</span><input id="light" type="range" min="0" max="2.5" step=".001" value="1.15"></div>
+      <div class="row"><span>Character front light<small>Key light (upper front)</small></span><input id="charFront" type="range" min="0" max="2.5" step=".001" value="0.7"></div>
+      <div class="row"><span>Character back light<small>Rim light (behind)</small></span><input id="charBack" type="range" min="0" max="2.5" step=".001" value="0.65"></div>
+      <div class="row"><span>Character fill<small>Soft ambient fill</small></span><input id="charFill" type="range" min="0" max="2.5" step=".001" value="0.85"></div>
+      <div class="row">
+        <span>Man scale<small>Scale character (×1.1 / ×0.9)</small></span>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+          <button id="manScaleMinus" class="item" type="button" style="min-width:42px;height:34px;padding:0;font-size:18px;line-height:1">−</button>
+          <span id="manScaleValue" style="min-width:52px;text-align:center;font-size:10px;font-variant-numeric:tabular-nums">0.0300</span>
+          <button id="manScalePlus" class="item" type="button" style="min-width:42px;height:34px;padding:0;font-size:18px;line-height:1">+</button>
+        </div>
+      </div>
+      <div class="row">
+        <span>Camera mode</span>
+        <div style="display:flex;gap:6px;justify-content:flex-end">
+          <button id="btnCamClose" class="item" type="button" style="min-width:56px;height:30px;padding:0 8px;font-size:10px;color:#70b5ff">Close</button>
+          <button id="btnCamNormal" class="item" type="button" style="min-width:56px;height:30px;padding:0 8px;font-size:10px">Normal</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="section">
+      <div class="row"><span>Ground color</span><input id="groundColor" type="color" value="#7a8a6e"></div>
+      <div class="row"><span>Ground brightness<small>0.2 dark · 1 normal · 2.5 bright</small></span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="groundBrightness" type="range" min="0.2" max="2.5" step="0.05" value="1" style="flex:1">
+          <span id="groundBrightnessValue" style="min-width:36px;font-size:10px;font-variant-numeric:tabular-nums">1.00</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <button id="delete" class="item" style="width:100%">Delete selected object</button>
+      <button id="clearSave" class="item" style="width:100%;margin-top:7px">Reset saved world</button>
+    </div>
+  </section>
+
+  <section id="addPanel" class="panel glass">
+    <div class="head">
+      <div><div class="title">Add to world</div><div class="sub">Objects · import</div></div>
+      <button class="close" data-close="addPanel">Close</button>
+    </div>
+
+    <div class="section">
+      <div class="grid">
+        <button class="item" data-type="Man">Man</button>
+        <button class="item" data-type="Girl">Girl</button>
+        <button class="item" data-type="Home">Home</button>
+        <button class="item" data-type="Car">Car</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row" style="display:block">
+        <span>Import GLB / GLTF</span>
+        <small style="margin:5px 0 7px">Supports multiple files. Loads one by one to keep the game smooth.</small>
+        <input id="modelFiles" type="file" accept=".glb,.gltf,.bin,.png,.jpg,.jpeg,.webp" multiple>
+      </div>
+      <div class="row" style="display:block">
+        <span>Name (optional)</span>
+        <input id="objectName" type="text" placeholder="Object name">
+      </div>
+      <button id="importModel" class="item" style="width:100%">Import model(s)</button>
+      <div id="importStatus" style="margin-top:8px;font-size:9px;color:var(--muted)"></div>
+    </div>
+
+    <div class="section">
+      <div class="grid">
+        <button id="rotL" class="item">Rotate left</button>
+        <button id="rotR" class="item">Rotate right</button>
+        <button id="raise" class="item">Raise</button>
+        <button id="lower" class="item">Lower</button>
+      </div>
+      <div class="grid" style="margin-top:7px">
+        <button id="scaleMinus" class="item">Scale −</button>
+        <button id="scalePlus" class="item">Scale +</button>
+      </div>
+      <button id="driveBtn" class="item" style="width:100%;margin-top:7px">Drive / Exit vehicle</button>
+      <div style="font-size:8px;color:var(--muted);margin-top:6px">Select from list below only · D-pad moves selected · Scale ± · Drive/E for cars</div>
+    </div>
+
+    <div class="section">
+      <div class="title" style="font-size:12px;margin-bottom:8px">World objects</div>
+      <div id="objectList" style="max-height:180px;overflow:auto;display:flex;flex-direction:column;gap:5px"></div>
+      <div class="grid" style="margin-top:8px">
+        <button id="deselectBtn" class="item">Deselect</button>
+        <button id="deleteSelected" class="item">Delete selected</button>
+        <button id="deleteAllObjs" class="item">Delete all</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+window.addEventListener("error", function(e){
+  var box=document.getElementById("runtimeError");
+  if(!box){box=document.createElement("pre");box.id="runtimeError";box.style="position:fixed;left:8px;right:8px;bottom:8px;z-index:999999;background:#400;color:#fff;padding:12px;font:12px monospace;white-space:pre-wrap;max-height:35vh;overflow:auto";document.body.appendChild(box);}
+  box.textContent="Three.js error: "+(e.message||e.error||"unknown error");
+});
+window.addEventListener("unhandledrejection", function(e){
+  var box=document.getElementById("runtimeError");
+  if(!box){box=document.createElement("pre");box.id="runtimeError";box.style="position:fixed;left:8px;right:8px;bottom:8px;z-index:999999;background:#400;color:#fff;padding:12px;font:12px monospace;white-space:pre-wrap;max-height:35vh;overflow:auto";document.body.appendChild(box);}
+  box.textContent="Three.js promise error: "+e.reason;
+});
+</script>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
+import {RoomEnvironment} from "three/addons/environments/RoomEnvironment.js";
+
+const $=id=>document.getElementById(id);
+const canvas=$("view");
+const scene=new THREE.Scene();
+
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.05,900);
+camera.position.set(0,2.85,6.5);
+
+const renderer=new THREE.WebGLRenderer({
+  canvas,antialias:true,powerPreference:"high-performance"
+});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 3)); // max sharpness
+renderer.setSize(innerWidth,innerHeight,false);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.35;
+renderer.shadowMap.enabled=false;
+renderer.shadowMap.type=THREE.BasicShadowMap;
+renderer.info.autoReset=true;
+
+// Global environment map
+const pmrem=new THREE.PMREMGenerator(renderer);
+pmrem.compileEquirectangularShader();
+const roomEnv=new RoomEnvironment();
+const envRT=pmrem.fromScene(roomEnv,0.04);
+scene.environment=envRT.texture;
+roomEnv.dispose();
+
+/* ---------- Light mirrors: sky + ground env (visible, not black) ---------- */
+/* Only meshes with "Mirror" in the name. */
+let mirrorMaterials = [];
+let mirrorEnvMap = null;
+let _mirrorEnvDay = -1;
+
+function isMirrorName(name){
+  return !!(name && /mirror/i.test(String(name)));
+}
+
+function buildMirrorEnvMap(){
+  // Tiny scene → PMREM once (or when day shifts a lot). Cheap & visible.
+  const g = new THREE.Scene();
+  const day = (typeof env !== "undefined" && env.day != null) ? env.day : 0.62;
+  const elev = Math.sin((day - 0.25) * Math.PI * 2);
+  const daylight = THREE.MathUtils.smoothstep(elev, -0.28, 0.32);
+  const golden = 1 - THREE.MathUtils.smoothstep(Math.abs(elev - 0.05), 0.0, 0.25);
+  const night = 1 - daylight;
+
+  // Sky colors matching world
+  const zenith = new THREE.Color().setRGB(
+    0.08 + 0.05 * daylight + 0.25 * golden,
+    0.12 + 0.22 * daylight,
+    0.22 + 0.55 * daylight * (1 - golden * 0.5)
+  );
+  const horizon = new THREE.Color().setRGB(
+    0.15 + 0.55 * daylight + 0.45 * golden,
+    0.12 + 0.45 * daylight + 0.15 * golden,
+    0.18 + 0.55 * daylight * (1 - golden * 0.6)
+  );
+  if(night > 0.5){
+    zenith.setRGB(0.02, 0.03, 0.08);
+    horizon.setRGB(0.04, 0.05, 0.12);
+  }
+
+  const skyMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    depthWrite: false,
+    uniforms: {
+      uZenith: { value: zenith },
+      uHorizon: { value: horizon }
+    },
+    vertexShader: `varying vec3 vP; void main(){ vP=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader: `
+      uniform vec3 uZenith, uHorizon;
+      varying vec3 vP;
+      void main(){
+        float h = clamp(vP.y * 0.5 + 0.5, 0.0, 1.0);
+        vec3 col = mix(uHorizon, uZenith, smoothstep(0.15, 0.95, h));
+        // ground hemisphere
+        if(vP.y < 0.0){
+          vec3 grd = vec3(0.28, 0.34, 0.24);
+          col = mix(uHorizon, grd, smoothstep(0.0, 0.55, -vP.y));
+        }
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  });
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(20, 16, 12), skyMat));
+
+  let gHex = 0x5a6850;
+  try{ if(env && env.groundColor) gHex = new THREE.Color(env.groundColor).getHex(); }catch(_){}
+  const ground = new THREE.Mesh(
+    new THREE.CircleGeometry(18, 16),
+    new THREE.MeshBasicMaterial({ color: gHex })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  g.add(ground);
+
+  if(mirrorEnvMap && mirrorEnvMap.dispose){ try{ mirrorEnvMap.dispose(); }catch(_){} }
+  const rt = pmrem.fromScene(g, 0.06);
+  mirrorEnvMap = rt.texture;
+
+  g.traverse(o => {
+    if(o.geometry) o.geometry.dispose();
+    if(o.material){ if(o.material.dispose) o.material.dispose(); }
+  });
+  _mirrorEnvDay = day;
+  return mirrorEnvMap;
+}
+
+function registerHomeMirrorMaterial(origMat){
+  if(!origMat || !origMat.isMaterial) return null;
+  // Always clone so we don't break shared GLB materials
+  const m = origMat.clone();
+  m.userData.__homeMirror = true;
+
+  // Force standard PBR mirror look (MeshBasic would stay black)
+  if(!("metalness" in m)){
+    // replace non-standard mats with MeshStandardMaterial
+    const std = new THREE.MeshStandardMaterial({
+      color: 0xe8eef4,
+      metalness: 1.0,
+      roughness: 0.05,
+      envMapIntensity: 1.8
+    });
+    std.userData.__homeMirror = true;
+    if(mirrorEnvMap) std.envMap = mirrorEnvMap;
+    else if(scene.environment) std.envMap = scene.environment;
+    std.needsUpdate = true;
+    mirrorMaterials.push(std);
+    return std;
+  }
+
+  if(m.color) m.color.setRGB(0.90, 0.94, 0.97);
+  m.metalness = 1.0;
+  m.roughness = 0.05;
+  if("envMapIntensity" in m) m.envMapIntensity = 1.8;
+  m.envMap = mirrorEnvMap || scene.environment || null;
+  m.transparent = false;
+  m.opacity = 1;
+  m.needsUpdate = true;
+  mirrorMaterials.push(m);
+  return m;
+}
+
+function prepareHomeMirrors(obj){
+  if(!obj) return;
+  if(!mirrorEnvMap) buildMirrorEnvMap();
+  obj.traverse(c => {
+    if(!c.isMesh || !c.material) return;
+    let p = c, yes = false;
+    while(p){
+      if(isMirrorName(p.name)){ yes = true; break; }
+      p = p.parent;
+    }
+    if(!yes) return;
+    c.userData.isHomeMirror = true;
+    if(Array.isArray(c.material)){
+      c.material = c.material.map(registerHomeMirrorMaterial);
+    } else {
+      c.material = registerHomeMirrorMaterial(c.material);
+    }
+  });
+}
+
+function updateLightMirrors(force=false){
+  if(!mirrorMaterials.length && !force) return;
+  const day = (typeof env !== "undefined" && env.day != null) ? env.day : 0.62;
+  // Rebuild only when day changed meaningfully (avoid lag)
+  if(force || !mirrorEnvMap || Math.abs(day - _mirrorEnvDay) > 0.04){
+    buildMirrorEnvMap();
+  }
+  for(const m of mirrorMaterials){
+    if(!m) continue;
+    if(m.envMap !== mirrorEnvMap){
+      m.envMap = mirrorEnvMap;
+      m.needsUpdate = true;
+    }
+  }
+}
+
+function cleanupMirrorsForObject(obj){
+  mirrorMaterials = mirrorMaterials.filter(m => m && m.userData && m.userData.__homeMirror);
+}
+function resizeMirrorReflectors(){}
+function disposeMirrorReflector(){}
+
+const hemi=new THREE.HemisphereLight(0xcfe7ff,0x56604f,1);
+const fillLight=new THREE.DirectionalLight(0x7898bd,.42);
+fillLight.position.set(-45,28,-45);
+const sunLight=new THREE.DirectionalLight(0xfff1d4,2);
+sunLight.castShadow=false;
+sunLight.shadow.mapSize.set(innerWidth>900?2048:1024,innerWidth>900?2048:1024);
+sunLight.shadow.bias=-.00008;
+sunLight.shadow.normalBias=.018;
+sunLight.shadow.camera.near=.2;
+sunLight.shadow.camera.far=180;
+sunLight.shadow.camera.left=-75;
+sunLight.shadow.camera.right=75;
+sunLight.shadow.camera.top=75;
+sunLight.shadow.camera.bottom=-75;
+scene.add(hemi,fillLight,sunLight);
+
+const root=new THREE.Group();
+scene.add(root);
+
+let worldSize=220;
+let groundY=0;
+let selected=null;
+let paused=false;
+let running=false;
+
+const move={x:0,z:0};
+const keys={};
+
+let player=null;
+let playerVisual=null;
+let mixer=null;
+let actions={};
+let currentAction=null;
+let velocityY=0;
+let grounded=true;
+
+const objects=[];
+const colliders=[];
+const collisionMeshes=[];
+
+const env={
+  day:.62,
+  angle:3.8,
+  height:.42,
+  skySat:.65,
+  fog:.35,
+  light:1.15,
+  charFront:0.7,
+  charBack:0.65,
+  charFill:0.85,
+  groundColor:'#7a8a6e',
+  groundBrightness:1.0
+};
+
+/* ---------- Camera system (stable + feet-proof) ---------- */
+let cameraMode = 'close'; // 'close' | 'normal'
+const cameraState = {
+  yaw: Math.PI,
+  pitch: 0.32,
+  idealDistance: 5.5,
+  currentDistance: 5.5,
+  minDistance: 2.0,
+  sensitivity: 0.0045,
+  userZoomClose: 0,
+  userZoomNormal: 0
+};
+const cameraTargetPos = new THREE.Vector3();
+const cameraSmoothPos = new THREE.Vector3();
+const cameraRaycaster = new THREE.Raycaster();
+const cameraUp = new THREE.Vector3(0, 1, 0);
+const _camDir = new THREE.Vector3();
+const _camRayDir = new THREE.Vector3();
+const _camFinal = new THREE.Vector3();
+const _camLook = new THREE.Vector3();
+const _bbox = new THREE.Box3();
+let _camInitialized = false;
+let _cachedCharH = 1.8;
+
+function isPlayerObject(obj){
+  let p = obj;
+  while(p){ if(p === player) return true; p = p.parent; }
+  return false;
+}
+
+function isVehicleObject(obj, vehicle){
+  if(!vehicle || !obj) return false;
+  let p = obj;
+  while(p){ if(p === vehicle) return true; p = p.parent; }
+  return false;
+}
+
+function getScaleFactor(obj){
+  if(!obj) return 1;
+  return Math.max(obj.scale.x, obj.scale.y, obj.scale.z, 0.001);
+}
+
+/** Real world height of the active target (bbox) — source of truth for look height */
+function measureTargetHeight(target){
+  if(!target) return 1.8;
+  target.updateMatrixWorld(true);
+  _bbox.setFromObject(target);
+  const h = _bbox.max.y - _bbox.min.y;
+  if(h > 0.05) return h;
+  return _cachedCharH > 0.05 ? _cachedCharH : 1.8;
+}
+
+function updateFollowCamera(dt){
+  if(!player) return;
+
+  const isCar = !!(driving && currentVehicle);
+  const target = isCar ? currentVehicle : player;
+
+  // Actual height from mesh bounds (survives any scale, including 0.03)
+  const charH = measureTargetHeight(target);
+  if(!isCar) _cachedCharH = charH;
+
+  // Look at upper chest / head — NEVER feet
+  // 0.72 of height ≈ chest/neck for bipeds; cabin for cars
+  const lookRatio = isCar ? 0.55 : 0.72;
+  const lookH = Math.max(charH * lookRatio, charH * 0.5 + 0.05);
+
+  // Distance ranges proportional to real height
+  let baseDist, minDist, maxDist, pitchMin, pitchMax;
+  if(isCar){
+    baseDist = (cameraMode === 'close' ? 3.8 : 8.0) * Math.max(charH, 1.0);
+    minDist  = Math.max(3.5, charH * 1.8);
+    maxDist  = Math.max(45, charH * 20);
+    pitchMin = 0.15;
+    pitchMax = 0.72;
+  } else {
+    baseDist = (cameraMode === 'close' ? 2.6 : 6.5) * Math.max(charH, 0.4);
+    minDist  = Math.max(1.8, charH * 1.15); // never closer than ~full body height
+    maxDist  = Math.max(30, charH * 16);
+    pitchMin = 0.18;  // prevent looking steeply down toward feet
+    pitchMax = 0.70;
+  }
+
+  const userZoom = cameraMode === 'close' ? cameraState.userZoomClose : cameraState.userZoomNormal;
+  let ideal = THREE.MathUtils.clamp(baseDist + userZoom, minDist, maxDist);
+  cameraState.idealDistance = ideal;
+  cameraState.minDistance = minDist;
+
+  // Desired look-at (world)
+  _camLook.set(target.position.x, target.position.y + lookH, target.position.z);
+
+  if(!_camInitialized){
+    cameraTargetPos.copy(_camLook);
+    cameraSmoothPos.set(0,0,0);
+    _camInitialized = true;
+  } else {
+    cameraTargetPos.lerp(_camLook, 1 - Math.exp(-14 * dt));
+  }
+
+  cameraState.pitch = THREE.MathUtils.clamp(cameraState.pitch, pitchMin, pitchMax);
+
+  const cosP = Math.cos(cameraState.pitch);
+  const sinP = Math.sin(cameraState.pitch);
+  const sinY = Math.sin(cameraState.yaw);
+  const cosY = Math.cos(cameraState.yaw);
+
+  // Spherical offset: camera sits BEHIND and ABOVE the look point
+  _camDir.set(sinY * cosP, sinP, cosY * cosP).normalize();
+
+  // Collision pull-in
+  _camRayDir.copy(_camDir);
+  cameraRaycaster.set(cameraTargetPos, _camRayDir);
+  cameraRaycaster.far = ideal + 0.6;
+
+  const hits = cameraRaycaster.intersectObjects(collisionMeshes, true).filter(h => {
+    if(h.distance < 0.4) return false;
+    if(isPlayerObject(h.object)) return false;
+    if(isCar && isVehicleObject(h.object, currentVehicle)) return false;
+    // ignore near-horizontal ground hits (they caused feet-cam)
+    if(h.face && h.face.normal && h.face.normal.y > 0.7) return false;
+    return true;
+  });
+
+  let targetDist = ideal;
+  if(hits.length && hits[0].distance < ideal){
+    targetDist = Math.max(hits[0].distance - 0.45, minDist);
+  }
+
+  const distAlpha = targetDist < cameraState.currentDistance
+    ? (1 - Math.exp(-16 * dt))
+    : (1 - Math.exp(-9 * dt));
+  cameraState.currentDistance = THREE.MathUtils.lerp(cameraState.currentDistance, targetDist, distAlpha);
+  cameraState.currentDistance = Math.max(cameraState.currentDistance, minDist);
+
+  _camFinal.copy(cameraTargetPos).addScaledVector(_camRayDir, cameraState.currentDistance);
+
+  // ===== HARD FEET LOCK =====
+  // 1) Camera Y must stay at or above look-point Y
+  if(_camFinal.y < cameraTargetPos.y){
+    _camFinal.y = cameraTargetPos.y;
+  }
+  // 2) Camera Y must stay above character mid-torso
+  const torsoY = target.position.y + charH * 0.45;
+  if(_camFinal.y < torsoY){
+    _camFinal.y = torsoY;
+  }
+  // 3) World ground
+  if(_camFinal.y < groundY + 0.5){
+    _camFinal.y = groundY + 0.5;
+  }
+
+  // Smooth position
+  if(cameraSmoothPos.lengthSq() < 1e-8){
+    cameraSmoothPos.copy(_camFinal);
+  } else {
+    cameraSmoothPos.lerp(_camFinal, 1 - Math.exp(-18 * dt));
+  }
+  // Apply same Y floor on smoothed pos (prevents lag diving to feet)
+  if(cameraSmoothPos.y < cameraTargetPos.y) cameraSmoothPos.y = cameraTargetPos.y;
+  if(cameraSmoothPos.y < torsoY) cameraSmoothPos.y = torsoY;
+
+  camera.position.copy(cameraSmoothPos);
+  camera.lookAt(cameraTargetPos);
+}
+
+function say(t){
+  $("status").textContent=t;
+  clearTimeout(say.t);
+  say.t=setTimeout(()=>$("status").textContent="World ready",2600);
+}
+function toast(t){
+  $("toast").textContent=t;
+  $("toast").classList.add("show");
+  clearTimeout(toast.t);
+  toast.t=setTimeout(()=>$("toast").classList.remove("show"),1800);
+}
+function mat(c,r=.78,m=0){
+  return new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+}
+
+/* ---------- Real sky: sun + moon + stars + gradient ---------- */
+const skyUniforms={
+  day:{value:env.day},
+  sunDir:{value:new THREE.Vector3(0,.8,0)},
+  moonDir:{value:new THREE.Vector3(0,-.8,0)},
+  sat:{value:env.skySat}
+};
+const sky=new THREE.Mesh(
+  new THREE.SphereGeometry(420,64,32),
+  new THREE.ShaderMaterial({
+    side:THREE.BackSide,
+    depthWrite:false,
+    uniforms:skyUniforms,
+    vertexShader:`
+      varying vec3 vWorld;
+      void main(){vWorld=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}
+    `,
+    fragmentShader:`
+      uniform float day; uniform vec3 sunDir; uniform vec3 moonDir; uniform float sat;
+      varying vec3 vWorld;
+      void main(){
+        vec3 view = normalize(vWorld);
+        float h = clamp(view.y * 0.5 + 0.5, 0.0, 1.0); // 0 = nadir-ish, 1 = zenith
+        float elev = sunDir.y;
+
+        // Smooth multi-phase day cycle
+        float daylight = smoothstep(-0.30, 0.28, elev);
+        float nightAmt = 1.0 - daylight;
+        // Golden hour strength (peaks when sun near horizon)
+        float golden = 1.0 - smoothstep(0.0, 0.38, abs(elev - 0.0));
+        golden = pow(golden, 0.85) * clamp(daylight + 0.15, 0.0, 1.0);
+        // Blue hour just after sunset / before sunrise
+        float blueHour = (1.0 - smoothstep(0.0, 0.22, abs(elev + 0.08))) * (1.0 - daylight * 0.5);
+
+        // ---------- Atmosphere base colors (full gradient, all times) ----------
+        // Night
+        vec3 nightHorizon = vec3(0.02, 0.03, 0.07);
+        vec3 nightMid     = vec3(0.01, 0.02, 0.06);
+        vec3 nightZenith  = vec3(0.005, 0.01, 0.04);
+
+        // Day (clear blue with soft horizon)
+        vec3 dayHorizon   = vec3(0.72, 0.84, 0.95);
+        vec3 dayMid       = vec3(0.38, 0.62, 0.92);
+        vec3 dayZenith    = vec3(0.10, 0.32, 0.72);
+
+        // Sunset / sunrise (strong horizontal bands)
+        vec3 setHorizon   = vec3(1.00, 0.28, 0.06); // deep fire orange-red
+        vec3 setLow       = vec3(1.00, 0.52, 0.15); // bright orange
+        vec3 setMid       = vec3(0.98, 0.42, 0.48); // pink-magenta
+        vec3 setHigh      = vec3(0.42, 0.22, 0.58); // rich purple upper
+
+        // Blue hour
+        vec3 blueHorizon  = vec3(0.25, 0.35, 0.65);
+        vec3 blueMid      = vec3(0.12, 0.18, 0.42);
+        vec3 blueZenith   = vec3(0.04, 0.06, 0.18);
+
+        // Vertical blends for each phase
+        vec3 nightCol = mix(nightHorizon, nightMid, smoothstep(0.0, 0.45, h));
+        nightCol = mix(nightCol, nightZenith, smoothstep(0.35, 1.0, h));
+
+        vec3 dayCol = mix(dayHorizon, dayMid, smoothstep(0.0, 0.40, h));
+        dayCol = mix(dayCol, dayZenith, smoothstep(0.30, 1.0, h));
+
+        // Sunset has stronger low-horizon band
+        vec3 setCol = mix(setHorizon, setLow, smoothstep(0.0, 0.18, h));
+        setCol = mix(setCol, setMid, smoothstep(0.12, 0.42, h));
+        setCol = mix(setCol, setHigh, smoothstep(0.35, 0.90, h));
+
+        vec3 blueCol = mix(blueHorizon, blueMid, smoothstep(0.0, 0.40, h));
+        blueCol = mix(blueCol, blueZenith, smoothstep(0.30, 1.0, h));
+
+        // Phase mixing: day <-> sunset <-> blue hour <-> night
+        vec3 skyDay = mix(dayCol, setCol, clamp(golden * 1.35, 0.0, 1.0));
+        vec3 skyTrans = mix(skyDay, blueCol, clamp(blueHour * 0.9, 0.0, 1.0));
+        vec3 col = mix(nightCol, skyTrans, clamp(daylight + blueHour * 0.35, 0.0, 1.0));
+
+        // Saturation control
+        float lum = dot(col, vec3(0.299, 0.587, 0.114));
+        col = mix(vec3(lum), col, sat);
+
+        // ---------- Atmospheric scattering along view ----------
+        // Soft horizon haze (always present, stronger at low sun)
+        float horizonBand = exp(-max(view.y, 0.0) * 4.5);
+        float scatterStr = (0.14 + 0.55 * golden + 0.18 * blueHour) * horizonBand;
+        vec3 scatterColor = mix(
+          vec3(0.55, 0.70, 0.95),                     // daytime cool haze
+          mix(vec3(1.0, 0.45, 0.18), vec3(0.9, 0.35, 0.5), blueHour), // warm / blue-hour
+          clamp(golden + blueHour, 0.0, 1.0)
+        );
+        col += scatterColor * scatterStr * (0.4 + 0.6 * daylight);
+
+        // ---------- Sun: small core + soft atmosphere glow (not a huge disc) ----------
+        float sunDot = max(dot(view, normalize(sunDir)), 0.0);
+        // Tight bright core
+        float sunCore = pow(sunDot, 900.0) * 1.8;
+        // Medium atmospheric glow
+        float sunGlow = pow(sunDot, 40.0) * 0.35;
+        // Wide soft bloom into the sky (the real "atmosphere" feel)
+        float sunBloom = pow(sunDot, 6.0) * 0.18 * (0.35 + 0.65 * daylight);
+        float warmBloom = pow(sunDot, 2.2) * golden * 0.42;
+
+        vec3 sunColor = mix(vec3(1.0, 0.97, 0.88), vec3(1.0, 0.55, 0.22), golden);
+        col += sunColor * (sunCore + sunGlow);
+        col += mix(vec3(1.0, 0.85, 0.6), vec3(1.0, 0.4, 0.15), golden) * (sunBloom + warmBloom);
+
+        // ---------- Moon ----------
+        float moonDot = max(dot(view, normalize(moonDir)), 0.0);
+        float moonCore = pow(moonDot, 500.0) * 0.7;
+        float moonGlow = pow(moonDot, 18.0) * 0.10;
+        col += vec3(0.55, 0.65, 0.95) * (moonCore + moonGlow) * nightAmt;
+
+        // Slight zenith darkening for depth
+        col *= (0.92 + 0.08 * smoothstep(0.0, 0.6, h));
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `
+  })
+);
+scene.add(sky);
+
+/* ---------- lightweight dynamic cloud layer ---------- */
+const cloudUniforms={uTime:{value:0},uSunPosition:{value:new THREE.Vector3()}};
+const cloud=new THREE.Mesh(new THREE.SphereGeometry(438,32,20),new THREE.ShaderMaterial({
+  side:THREE.BackSide,transparent:true,depthWrite:false,uniforms:cloudUniforms,
+  vertexShader:`varying vec3 vWorld;void main(){vWorld=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+  fragmentShader:`
+    uniform float uTime; uniform vec3 uSunPosition; varying vec3 vWorld;
+    float hash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+    float noise(vec3 p){
+      vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+      return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+      mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);
+    }
+    void main(){
+      // denser, multi-scale clouds
+      vec3 p = vWorld * 2.55 + vec3(uTime * 0.014, 0.0, uTime * 0.009);
+      float n = noise(p) + 0.55 * noise(p * 2.1) + 0.28 * noise(p * 4.2) + 0.12 * noise(p * 8.0);
+      float d = smoothstep(0.72, 1.32, n);          // lower threshold = more clouds
+      float horizon = smoothstep(0.015, 0.32, vWorld.y);
+      if (d < 0.02) discard;
+
+      float sun = max(dot(normalize(vWorld), normalize(uSunPosition)), 0.0);
+      float elev = uSunPosition.y;
+      float golden = 1.0 - smoothstep(-0.15, 0.25, abs(elev - 0.05));
+
+      // ALWAYS white / light gray base (never dark or blue)
+      vec3 whiteCloud = vec3(0.96, 0.97, 0.99);
+      vec3 softGray   = vec3(0.82, 0.85, 0.90);
+      vec3 c = mix(softGray, whiteCloud, clamp(d * 1.4, 0.0, 1.0));
+
+      // gentle warm tint only near sun during golden hour (still stays light)
+      vec3 warm = vec3(1.0, 0.88, 0.72);
+      c = mix(c, warm, pow(sun, 5.0) * golden * 0.45);
+      c += vec3(1.0, 0.7, 0.4) * pow(sun, 12.0) * golden * 0.25;
+
+      // keep overall brightness high so they never look black
+      c = max(c, vec3(0.75));
+
+      float alpha = d * 0.72 * horizon;
+      gl_FragColor = vec4(c, alpha);
+    }`
+}));
+scene.add(cloud);
+
+const sunDisc=new THREE.Mesh(
+  new THREE.SphereGeometry(0.85,16,12),
+  new THREE.MeshBasicMaterial({color:0xfff4c7})
+);
+sunDisc.renderOrder=2;
+scene.add(sunDisc);
+
+const stars=new THREE.Points(
+  new THREE.BufferGeometry(),
+  new THREE.PointsMaterial({color:0xffffff,size:.72,sizeAttenuation:true,transparent:true,opacity:0,depthWrite:false})
+);
+{
+  const pos=[];
+  for(let i=0;i<1400;i++){
+    const a=Math.random()*Math.PI*2;
+    const y=Math.random()*.92+.08;
+    const r=Math.sqrt(1-y*y);
+    pos.push(Math.cos(a)*r*390,y*390,Math.sin(a)*r*390);
+  }
+  stars.geometry.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+}
+scene.add(stars);
+
+function applyEnvironment(){
+  const t=env.day;
+  const elevation=Math.sin((t-.25)*Math.PI*2);
+  const az=env.angle;
+  const cosE=Math.cos(Math.asin(elevation));
+  const dir=new THREE.Vector3(Math.cos(az)*cosE,elevation,Math.sin(az)*cosE).normalize();
+  const skySun=dir.clone().multiplyScalar(140);
+  
+  const moonDir=dir.clone().multiplyScalar(-1);
+
+  skyUniforms.day.value=env.day;
+  skyUniforms.sunDir.value.copy(dir);
+  skyUniforms.moonDir.value.copy(moonDir);
+  skyUniforms.sat.value=env.skySat;
+  cloudUniforms.uSunPosition.value.copy(dir);
+  cloudUniforms.uTime.value=performance.now()*.001;
+
+  sunLight.position.copy(dir).multiplyScalar(140);
+  sunDisc.position.copy(dir).multiplyScalar(135);
+  // Prolonged, smooth daylight transition (matches sky shader)
+  const daylight = THREE.MathUtils.smoothstep(elevation, -0.28, 0.32);
+  const nightAmt = 1 - daylight;
+  const golden = 1 - THREE.MathUtils.smoothstep(Math.abs(elevation - 0.05), 0.0, 0.22);
+
+  sunDisc.visible = elevation > -0.12;
+  // warm sun color during golden hour
+  const sunWarm = THREE.MathUtils.clamp(golden, 0, 1);
+  sunDisc.material.color.setRGB(1.0, 0.95 - sunWarm * 0.35, 0.72 - sunWarm * 0.45);
+
+  fillLight.intensity=(.18+.55*daylight)*env.light;
+  fillLight.position.set(-dir.x*70,38,-dir.z*70);
+  sunLight.intensity=(0.05+2.15*env.light)*daylight;
+  hemi.intensity=(.22+.90*env.light)*(0.35+.65*daylight);
+  hemi.color.setHSL(.56,.30,.52+.32*daylight);
+  hemi.groundColor.setHSL(.28,.18,.22+.18*daylight);
+
+  if(nightAmt>0.05){
+    fillLight.intensity+=0.22*nightAmt*env.light;
+    hemi.intensity+=0.18*nightAmt*env.light;
+  }
+
+  stars.material.opacity=THREE.MathUtils.clamp((-.02-elevation)*2.1,0,.96);
+
+  // Fog color adapts to sky phase (day / golden / night)
+  const fogCol = new THREE.Color();
+  if(daylight > 0.55){
+    fogCol.setRGB(0.65, 0.76, 0.92);
+  } else if(daylight > 0.12 || golden > 0.3){
+    fogCol.setRGB(0.92, 0.48 + 0.2 * golden, 0.28 + 0.12 * daylight);
+  } else {
+    fogCol.setRGB(0.05, 0.07, 0.13);
+  }
+  if(!scene.fog) scene.fog = new THREE.FogExp2(fogCol.getHex(), 0.008);
+  scene.fog.color.copy(fogCol);
+  // Visible fog: slider 0..1 maps to density ~0.004 .. 0.036
+  scene.fog.density = 0.004 + env.fog * 0.032;
+
+  sunLight.shadow.camera.updateProjectionMatrix();
+
+  if(player){
+    const manKey=player.getObjectByName("ManKey");
+    const manFillL=player.getObjectByName("ManFill");
+    const manRim=player.getObjectByName("ManRim");
+    const manSide=player.getObjectByName("ManSide");
+    if(manKey) manKey.intensity=env.charFront*(0.55+0.45*daylight);
+    if(manRim) manRim.intensity=env.charBack*(0.5+0.5*Math.max(nightAmt,0.35));
+    if(manFillL) manFillL.intensity=env.charFill*(0.6+0.4*daylight);
+    if(manSide) manSide.intensity=env.charFront*0.35*(0.5+0.5*daylight);
+  }
+
+  if(typeof updateLightMirrors === "function") updateLightMirrors(false);
+}
+
+let ground;
+const groundMat=new THREE.MeshBasicMaterial({color:0x68745f,side:THREE.DoubleSide});
+function buildSimpleGround(){
+  if(ground)scene.remove(ground);
+  ground=new THREE.Mesh(new THREE.PlaneGeometry(worldSize,worldSize),groundMat);
+  ground.rotation.x=-Math.PI/2;
+  ground.position.y=groundY;
+  ground.name="SimpleGround";
+  ground.userData.solid=true;
+  scene.add(ground);
+}
+buildSimpleGround();
+refreshColliders();
+applyEnvironment();
+
+const assetLoader=new GLTFLoader();
+const assetCache={};
+
+async function loadAssetGLB(path,type,name,opts={}){
+  try{
+    let gltf=assetCache[path];
+    if(!gltf){
+      gltf=await assetLoader.loadAsync(path);
+      assetCache[path]=gltf;
+    }
+    const o=gltf.scene.clone(true);
+    o.traverse(c=>{
+      if(c.isMesh&&c.material){
+        c.material=Array.isArray(c.material)?c.material.map(m=>m.clone()):c.material.clone();
+      }
+    });
+    o.userData={
+      type,
+      solid:true,
+      vehicle:type==="Car",
+      imported:true,
+      assetPath:path
+    };
+    o.name=name||type;
+    optimizeImportedModel(o);
+    if(type==="Home"){
+      prepareHomeMirrors(o);
+      
+      updateLightMirrors(true);
+    }
+    if(opts.skipPlace){
+      root.add(o);
+      objects.push(o);
+      return o;
+    }
+    place(o,o.name);
+    say(type+" loaded");
+    toast(type+" added");
+    return o;
+  }catch(e){
+    console.error(e);
+    toast(type+" failed — put "+path+" next to the HTML");
+    say("Missing "+path);
+    return null;
+  }
+}
+
+function createPlaceholder(type){
+  const g=new THREE.Group();
+  g.userData={type,solid:true,vehicle:type==="Car"};
+  g.name=type+" (missing GLB)";
+  const mesh=new THREE.Mesh(
+    type==="Car"?new THREE.BoxGeometry(2.2,0.9,4.2):
+    type==="Home"?new THREE.BoxGeometry(4,2.5,4):
+    new THREE.CapsuleGeometry(0.3,1,6,10),
+    mat(0x666666,0.8)
+  );
+  mesh.position.y=type==="Home"?1.25:type==="Car"?0.45:0.9;
+  mesh.castShadow=false;mesh.receiveShadow=false;
+  g.add(mesh);
+  return g;
+}
+
+function fitToGround(o){
+  const b=new THREE.Box3().setFromObject(o);
+  o.position.y+=groundY-b.min.y;
+}
+
+function disposeObject(o){
+  if(!o)return;
+  // Dispose any professional Reflector mirrors attached to this object
+  if(typeof cleanupMirrorsForObject === "function") cleanupMirrorsForObject(o);
+  o.traverse(child=>{
+    if(child.userData && child.userData.isReflector){
+      if(typeof disposeMirrorReflector === "function") disposeMirrorReflector(child);
+      return;
+    }
+    if(child.isMesh){
+      if(child.geometry)child.geometry.dispose();
+      const mats=Array.isArray(child.material)?child.material:[child.material];
+      for(const m of mats){
+        if(!m)continue;
+        for(const key of Object.keys(m)){
+          if(m[key]&&m[key].isTexture)m[key].dispose();
+        }
+        if(m.dispose)m.dispose();
+      }
+    }
+    if(child.userData&&child.userData._blobUrls){
+      child.userData._blobUrls.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});
+    }
+  });
+  if(o.parent)o.parent.remove(o);
+}
+
+function optimizeImportedModel(rootObj){
+  rootObj.traverse(x=>{
+    if(!x.isMesh)return;
+    x.frustumCulled=true;
+    x.castShadow=false;
+    x.receiveShadow=false;
+    if(x.geometry){
+      x.geometry.computeBoundingSphere();
+    }
+  });
+}
+
+function place(o,name){
+  o.name=name||o.userData.type||"Object";
+  const base=player?player.position:new THREE.Vector3(0,groundY,0);
+  const offset=1.8+objects.length*0.15;
+  o.position.set(base.x+offset,groundY,base.z-2.2);
+  root.add(o);
+  objects.push(o);
+  fitToGround(o);
+  if(!o.userData.vehicle&&(o.userData.imported||o.userData.type==="Home"||o.userData.type==="Girl")){
+    requestAnimationFrame(()=>{
+      o.updateMatrixWorld(true);
+      o.traverse(c=>{if(c!==o)c.matrixAutoUpdate=false;});
+    });
+  }else{
+    o.traverse(c=>{c.matrixAutoUpdate=true});
+  }
+  refreshColliders();
+  refreshObjectList();
+  queueSave();
+}
+
+function refreshColliders(){
+  colliders.length=0;
+  collisionMeshes.length=0;
+  if(ground)collisionMeshes.push(ground);
+  for(const o of objects){
+    if(!o.visible||o.userData.solid===false)continue;
+    const b=new THREE.Box3().setFromObject(o);
+    const sx=b.max.x-b.min.x, sz=b.max.z-b.min.z;
+    const cx=(b.min.x+b.max.x)*.5, cz=(b.min.z+b.max.z)*.5;
+    colliders.push({o,c:{x:cx,z:cz},hx:sx/2+.02,hz:sz/2+.02});
+    collisionMeshes.push(o);
+  }
+}
+
+function refreshObjectList(){
+  const list=$("objectList");
+  if(!list)return;
+  list.innerHTML="";
+  if(!objects.length){
+    list.innerHTML='<div style="font-size:9px;color:var(--muted);padding:6px">No objects yet</div>';
+    return;
+  }
+  objects.forEach((o,i)=>{
+    const row=document.createElement("div");
+    row.className="item";
+    row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer;padding:7px 8px";
+    if(selected===o)row.style.background="rgba(120,180,255,.18)";
+    const label=document.createElement("span");
+    label.style.cssText="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1";
+    const tag=o.userData.vehicle||isVehicle(o)?" 🚗":"";
+    label.textContent=`${i+1}. ${o.name||o.userData.type||"Object"}${tag}`;
+    const del=document.createElement("button");
+    del.className="close";
+    del.textContent="✕";
+    del.style.cssText="padding:4px 7px;font-size:9px;flex-shrink:0";
+    del.onclick=e=>{
+      e.stopPropagation();
+      selectObject(o);
+      deleteSelectedObject();
+    };
+    row.onclick=()=>{
+      if(selected===o)selectObject(null);
+      else selectObject(o);
+    };
+    row.appendChild(label);
+    row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+function blocked(p,r,ignore){
+  for(const c of colliders){
+    if(c.o===ignore)continue;
+    const dx=Math.max(Math.abs(p.x-c.c.x)-c.hx,0);
+    const dz=Math.max(Math.abs(p.z-c.c.z)-c.hz,0);
+    if(dx*dx+dz*dz<r*r)return true;
+  }
+  return false;
+}
+function movePlayer(dx,dz){
+  if(!player)return;
+  const nx=player.position.x+dx;
+  const nz=player.position.z+dz;
+  if(Math.abs(nx)<worldSize/2-1 && !blocked(new THREE.Vector3(nx,player.position.y,player.position.z),.18,player))
+    player.position.x=nx;
+  if(Math.abs(nz)<worldSize/2-1 && !blocked(new THREE.Vector3(player.position.x,player.position.y,nz),.18,player))
+    player.position.z=nz;
+}
+
+const enabledAnimButtons=new Set();
+
+function isLocomotionAnim(n){
+  return /^(.*\b)?(idle|stand|standing|walk|walking|run|running|jog|sprint|locomotion|t-?pose|neutral)(\b.*)?$/i.test(n);
+}
+
+function safeClip(c){
+  const clone=c.clone();
+  clone.tracks=clone.tracks.map(t=>{
+    if(!/\.position$/.test(t.name)) return t;
+    const n=t.name.toLowerCase();
+    if(!/(root|hips|mixamorig:hips|mixamorighips)/.test(n)) return t;
+    const tr=t.clone();
+    for(let i=0;i<tr.values.length;i+=3){
+      tr.values[i]=0;
+      tr.values[i+2]=0;
+    }
+    return tr;
+  });
+  return clone;
+}
+
+function shortAnimName(n){
+  let s=String(n||"anim")
+    .replace(/mixamorig[:_]?/ig,"")
+    .replace(/armature\|?/ig,"")
+    .replace(/[^a-zA-Z0-9]+/g," ")
+    .trim();
+  if(s.length>14)s=s.slice(0,13)+"…";
+  return s||"anim";
+}
+
+function findAction(regexes){
+  const names=Object.keys(actions);
+  for(const re of regexes){
+    const n=names.find(x=>re.test(x));
+    if(n)return n;
+  }
+  return null;
+}
+
+function playAction(name,loop=THREE.LoopOnce){
+  const a=actions[name];
+  if(!a)return;
+  if(currentAction===a&&a.isRunning())return;
+  if(currentAction&&currentAction!==a)currentAction.fadeOut(0.12);
+  a.reset();
+  a.setLoop(loop,loop===THREE.LoopOnce?1:Infinity);
+  a.clampWhenFinished=loop===THREE.LoopOnce;
+  a.enabled=true;
+  a.fadeIn(0.12).play();
+  currentAction=a;
+}
+
+function setupAnimations(gltf){
+  mixer=new THREE.AnimationMixer(playerVisual);
+  actions={};
+  currentAction=null;
+  enabledAnimButtons.clear();
+
+  for(const clip of gltf.animations||[]){
+    const n=(clip.name||"clip").trim();
+    if(!n)continue;
+    if(/^(car|vehicle|door|wheel|steer)\b/i.test(n))continue;
+    actions[n]=mixer.clipAction(safeClip(clip));
+  }
+
+  const idle=findAction([/^idle$/i,/idle/i,/^stand$/i,/standing/i,/t-?pose/i,/neutral/i]);
+  if(idle)playAction(idle);
+  else{
+    const safe=Object.keys(actions).find(n=>!/punch|attack|hit|death|fall/i.test(n));
+    if(safe)playAction(safe);
+  }
+
+  ["jump","wave","dance","sit","clap","cheer","yes","no","salute"].forEach(key=>{
+    const n=findAction([new RegExp(key,"i")]);
+    if(n&&!isLocomotionAnim(n))enabledAnimButtons.add(n);
+  });
+
+  buildAnimChecklist();
+  buildAnimationButtons();
+}
+
+function buildAnimChecklist(){
+  const box=$("animChecklist");
+  if(!box)return;
+  box.innerHTML="";
+  const names=Object.keys(actions)
+    .filter(n=>!isLocomotionAnim(n))
+    .sort((a,b)=>a.localeCompare(b));
+  if(!names.length){
+    box.innerHTML='<div style="font-size:9px;color:var(--muted)">No extra animations (walk/run/idle are on movement controls)</div>';
+    return;
+  }
+  names.forEach(n=>{
+    const row=document.createElement("label");
+    row.style.cssText="display:flex;align-items:center;gap:8px;padding:7px 8px;border:0;border-radius:12px;background:rgba(255,255,255,.06);cursor:pointer";
+    const cb=document.createElement("input");
+    cb.type="checkbox";
+    cb.checked=enabledAnimButtons.has(n);
+    cb.style.accentColor="#fff";
+    const span=document.createElement("span");
+    span.style.cssText="font-size:10px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+    span.textContent=shortAnimName(n);
+    span.title=n;
+    cb.onchange=()=>{
+      if(cb.checked)enabledAnimButtons.add(n);
+      else enabledAnimButtons.delete(n);
+      buildAnimationButtons();
+    };
+    row.appendChild(cb);
+    row.appendChild(span);
+    span.onclick=e=>{
+      e.preventDefault();
+      playAction(n);
+      toast(shortAnimName(n));
+    };
+    box.appendChild(row);
+  });
+}
+
+function buildAnimationButtons(){
+  const bar=$("actions");
+  if(!bar)return;
+  bar.querySelectorAll("button.anim-act").forEach(b=>b.remove());
+  const names=[...enabledAnimButtons].filter(n=>actions[n]&&!isLocomotionAnim(n));
+  names.forEach(n=>{
+    const b=document.createElement("button");
+    b.className="action anim-act";
+    b.textContent=shortAnimName(n);
+    b.title=n;
+    b.onpointerdown=e=>{
+      e.preventDefault();
+      playAction(n);
+    };
+    bar.appendChild(b);
+  });
+}
+
+async function loadMan(){
+  const loader=new GLTFLoader();
+  try{
+    const gltf=await loader.loadAsync("./Man.glb");
+    if(player)root.remove(player);
+    player=new THREE.Group();
+    player.name="Man.glb";
+    player.userData={type:"Man",solid:true,player:true};
+
+    playerVisual=gltf.scene;
+    playerVisual.name="Man.glb";
+    player.add(playerVisual);
+
+    const manKey = new THREE.DirectionalLight(0xfff4ec, 0.5);
+    manKey.position.set(3.5, 5.0, 2.0);
+    manKey.name = "ManKey";
+    player.add(manKey);
+
+    const manFill = new THREE.HemisphereLight(0xe8eef8, 0x3a3a42, 0.7);
+    manFill.name = "ManFill";
+    player.add(manFill);
+
+    const manRim = new THREE.DirectionalLight(0xc2d4ff, 0.35);
+    manRim.position.set(-3.0, 3.5, -4.0);
+    manRim.name = "ManRim";
+    player.add(manRim);
+
+    const manSide = new THREE.DirectionalLight(0xfff0e8, 0.22);
+    manSide.position.set(-2.5, 2.0, 3.0);
+    manSide.name = "ManSide";
+    player.add(manSide);
+
+    playerVisual.traverse(o=>{
+      if(o.isMesh){
+        o.castShadow=false;
+        o.receiveShadow=false;
+        o.frustumCulled=true;
+
+        const mats=Array.isArray(o.material)?o.material:[o.material];
+        for(const m of mats){
+          if(!m)continue;
+          if("envMapIntensity" in m) m.envMapIntensity=1.0;
+          for(const key of ["map","normalMap","roughnessMap","metalnessMap","aoMap","emissiveMap"]){
+            const tex=m[key];
+            if(!tex)continue;
+            tex.minFilter=THREE.LinearMipmapLinearFilter;
+            tex.magFilter=THREE.LinearFilter;
+            tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+            tex.needsUpdate=true;
+          }
+          m.needsUpdate=true;
+        }
+      }
+    });
+
+    // Fixed start scale = 0.03 (as requested). Visual keeps GLB proportions.
+    // player.scale is the live scale factor saved/restored automatically.
+    playerVisual.scale.set(1,1,1);
+    player.scale.setScalar(0.03);
+
+    player.position.set(0,groundY,0);
+    move.x=0; move.z=0; running=false; velocityY=0; grounded=true;
+    root.add(player);
+
+    // Plant feet on ground after scale
+    player.updateMatrixWorld(true);
+    const vb=new THREE.Box3().setFromObject(player);
+    player.position.y += (groundY - vb.min.y);
+    playerVisual.position.y = 0;
+
+    _cachedCharH = Math.max(0.05, vb.max.y - vb.min.y);
+    cameraState.currentDistance = Math.max(2.5, _cachedCharH * 2.8);
+    cameraState.idealDistance = cameraState.currentDistance;
+    cameraState.userZoomClose = 0;
+    cameraState.userZoomNormal = 0;
+    cameraState.yaw = Math.PI;
+    cameraState.pitch = 0.32;
+    _camInitialized = false;
+    cameraSmoothPos.set(0,0,0);
+
+    setupAnimations(gltf);
+    refreshColliders();
+    updateManScaleUI();
+    queueSave(); // persist initial scale immediately
+    say("Man.glb ready");
+  }catch(e){
+    console.error(e);
+    player=new THREE.Group();
+    player.name="Man.glb";
+    player.userData={type:"Man",solid:true,player:true};
+    playerVisual=new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.3,1.1,6,10),
+      mat(0x888888,0.7)
+    );
+    playerVisual.position.y=0.85;
+    playerVisual.castShadow=false;
+    player.add(playerVisual);
+    root.add(player);
+    say("Man.glb failed to load");
+  }
+}
+
+let driving=false;
+let currentVehicle=null;
+const carState={
+  speed:0,
+  maxSpeed:28,
+  accel:18,
+  brake:32,
+  coast:6,
+  turnRate:1.9,
+  steer:0
+};
+
+function isVehicle(o){
+  if(!o)return false;
+  if(o.userData.vehicle)return true;
+  const t=(o.userData.type||o.name||"").toLowerCase();
+  return /car|vehicle|auto|truck|bike/.test(t);
+}
+
+function findNearestVehicle(maxDist=14){
+  let best=null,bestD=maxDist;
+  if(!player) return null;
+  for(const o of objects){
+    if(!isVehicle(o))continue;
+    const d=o.position.distanceTo(player.position);
+    if(d<bestD){bestD=d;best=o}
+  }
+  return best;
+}
+
+function updateDriveButtonVisibility(){
+  const btn = $("driveAction");
+  if(!btn) return;
+  if(typeof gameStarted !== "undefined" && !gameStarted){
+    btn.classList.remove("show-drive");
+    return;
+  }
+  if(!player){
+    btn.classList.remove("show-drive");
+    return;
+  }
+  if(driving){
+    btn.classList.add("show-drive");
+    btn.textContent = "Exit";
+    return;
+  }
+  const near = findNearestVehicle(6);
+  if(near){
+    btn.classList.add("show-drive");
+    btn.textContent = "Drive";
+  } else {
+    btn.classList.remove("show-drive");
+  }
+}
+
+function enterVehicle(v){
+  if(!v||!player||driving)return;
+  driving=true;
+  currentVehicle=v;
+  v.userData.vehicle=true;
+  v.traverse(c=>{c.matrixAutoUpdate=true});
+  if(playerVisual)playerVisual.visible=false;
+  player.position.copy(v.position);
+  carState.speed=0;
+  carState.steer=0;
+  // Camera: behind car, slightly elevated (stable)
+  cameraState.yaw = v.rotation.y + Math.PI;
+  cameraState.pitch = 0.32;
+  cameraState.userZoomClose = 0;
+  cameraState.userZoomNormal = 0;
+  cameraState.currentDistance = 9;
+  cameraState.idealDistance = 9;
+  _camInitialized = false;
+  cameraSmoothPos.set(0,0,0);
+  selectObject(null);
+  toast("Driving — D-pad steer · wheel/pinch zoom · E exit");
+  say("Driving "+(v.name||"vehicle"));
+}
+
+function exitVehicle(){
+  if(!driving||!currentVehicle||!player)return;
+  const v=currentVehicle;
+  const side=new THREE.Vector3(1.8,0,0).applyAxisAngle(new THREE.Vector3(0,1,0),v.rotation.y);
+  player.position.copy(v.position).add(side);
+  player.position.y=groundY;
+  if(playerVisual)playerVisual.visible=true;
+  driving=false;
+  currentVehicle=null;
+  carState.speed=0;
+  cameraState.yaw = player.rotation.y + Math.PI;
+  cameraState.pitch = 0.28;
+  cameraState.userZoomClose = 0;
+  cameraState.userZoomNormal = 0;
+  cameraState.currentDistance = 5.0;
+  _camInitialized = false;
+  cameraSmoothPos.set(0,0,0);
+  const btn=$("driveAction");
+  if(btn)btn.textContent="Drive";
+  toast("Exited vehicle");
+  say("On foot");
+}
+
+function toggleDrive(){
+  if(driving){
+    exitVehicle();
+    const btn=$("driveAction");
+    if(btn)btn.textContent="Drive";
+    return;
+  }
+  let v=null;
+  if(selected&&isVehicle(selected))v=selected;
+  else v=findNearestVehicle();
+  if(!v){toast("No car nearby — select Car in list or stand closer");return}
+  enterVehicle(v);
+  const btn=$("driveAction");
+  if(btn)btn.textContent="Exit";
+}
+
+if($("driveBtn"))$("driveBtn").onclick=e=>{e.preventDefault();toggleDrive()};
+if($("driveAction"))$("driveAction").onpointerdown=e=>{e.preventDefault();toggleDrive()};
+if($("deselectBtn"))$("deselectBtn").onclick=()=>{selectObject(null);toast("Deselected")};
+addEventListener("keydown",e=>{
+  if(e.code==="KeyE"&&!e.repeat)toggleDrive();
+  if(e.code==="Escape"){
+    if(typeof gameStarted !== "undefined" && gameStarted){
+      if($("pauseDialog") && $("pauseDialog").classList.contains("open")) closePauseDialog();
+      else openPauseDialog();
+    } else {
+      selectObject(null);
+    }
+  }
+});
+
+function updateVehicle(dt){
+  if(!driving||!currentVehicle)return;
+  const v=currentVehicle;
+  let throttle=0,steer=0;
+  // UP / W = forward, DN / S = reverse, LT = turn left, RT = turn right
+  if(keys.w||keys.ArrowUp||move.z<0)throttle+=1;
+  if(keys.s||keys.ArrowDown||move.z>0)throttle-=1;
+  if(keys.a||keys.ArrowLeft||move.x<0)steer+=1;
+  if(keys.d||keys.ArrowRight||move.x>0)steer-=1;
+
+  if(throttle>0)carState.speed+=carState.accel*dt*throttle;
+  else if(throttle<0)carState.speed+=carState.brake*dt*throttle;
+  else{
+    if(carState.speed>0)carState.speed=Math.max(0,carState.speed-carState.coast*dt);
+    else if(carState.speed<0)carState.speed=Math.min(0,carState.speed+carState.coast*dt);
+  }
+  carState.speed=THREE.MathUtils.clamp(carState.speed,-carState.maxSpeed*0.45,carState.maxSpeed);
+
+  const spd=Math.abs(carState.speed);
+  const steerFactor=spd<0.4?0:THREE.MathUtils.clamp(spd/carState.maxSpeed,0.2,1);
+  if(steer!==0&&spd>0.25){
+    const dir=Math.sign(carState.speed)||1;
+    v.rotation.y+=steer*carState.turnRate*steerFactor*dir*dt;
+  }
+
+  const forward=new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0),v.rotation.y);
+  v.position.addScaledVector(forward,carState.speed*dt);
+
+  const box=new THREE.Box3().setFromObject(v);
+  v.position.y+=groundY-box.min.y;
+
+  const limit=worldSize*0.5-2;
+  v.position.x=THREE.MathUtils.clamp(v.position.x,-limit,limit);
+  v.position.z=THREE.MathUtils.clamp(v.position.z,-limit,limit);
+
+  player.position.copy(v.position);
+  player.rotation.y=v.rotation.y;
+  v.updateMatrixWorld(true);
+}
+
+function updateSelectedObject(dt){
+  if(driving||!selected||selected===player)return;
+  let ix=move.x,iz=move.z;
+  if(keys.w||keys.ArrowUp)iz-=1;
+  if(keys.s||keys.ArrowDown)iz+=1;
+  if(keys.a||keys.ArrowLeft)ix-=1;
+  if(keys.d||keys.ArrowRight)ix+=1;
+  if(!ix&&!iz)return;
+
+  selected.traverse(c=>{c.matrixAutoUpdate=true});
+
+  const speed=(keys.Shift||running)?8:4;
+  camera.getWorldDirection(camDirMove);
+  camDirMove.y=0;
+  if(camDirMove.lengthSq()<0.001)camDirMove.set(0,0,-1);
+  camDirMove.normalize();
+  camRight.crossVectors(camDirMove,cameraUp).normalize();
+
+  const delta=new THREE.Vector3();
+  if(iz<0)delta.add(camDirMove);
+  if(iz>0)delta.sub(camDirMove);
+  if(ix<0)delta.sub(camRight);
+  if(ix>0)delta.add(camRight);
+  if(delta.lengthSq()>0.001){
+    delta.normalize().multiplyScalar(speed*dt);
+    selected.position.x+=delta.x;
+    selected.position.z+=delta.z;
+    selected.updateMatrixWorld(true);
+    if(selectionHelper){
+      const box=new THREE.Box3().setFromObject(selected);
+      selectionHelper.box.copy(box);
+    }
+    queueSave();
+  }
+}
+
+const moveDir=new THREE.Vector3();
+const camDirMove=new THREE.Vector3();
+const camRight=new THREE.Vector3();
+const bodyCenter=new THREE.Vector3();
+const nextPos=new THREE.Vector3();
+const rayOrigin=new THREE.Vector3();
+const downVector=new THREE.Vector3(0,-1,0);
+const finalMove=new THREE.Vector3();
+const velocityXZ=new THREE.Vector3();
+const movementRaycaster=new THREE.Raycaster();
+
+const MOVE={
+  walkSpeed:4.8,
+  runSpeed:9.2,
+  accel:18,
+  decel:22,
+  rotateSpeed:10,
+  jumpForce:7.0,
+  gravity:22,
+  stepHeight:0.55,
+  playerRadius:0.28
+};
+
+function jump(){
+  if(!player||!grounded)return;
+  velocityY=MOVE.jumpForce;
+  grounded=false;
+  const j=findAction([/jump/i]);
+  if(j)playAction(j);
+}
+
+function updatePlayer(dt){
+  if(!player)return;
+  if(driving)return;
+  if(selected&&selected!==player)return;
+
+  let ix=move.x, iz=move.z;
+  if(keys.w||keys.ArrowUp)iz-=1;
+  if(keys.s||keys.ArrowDown)iz+=1;
+  if(keys.a||keys.ArrowLeft)ix-=1;
+  if(keys.d||keys.ArrowRight)ix+=1;
+
+  ix=THREE.MathUtils.clamp(ix,-1,1);
+  iz=THREE.MathUtils.clamp(iz,-1,1);
+
+  const isMoving=Math.abs(ix)>0.01||Math.abs(iz)>0.01;
+  const isRunning=running||keys.Shift;
+
+  camera.getWorldDirection(camDirMove);
+  camDirMove.y=0;
+  if(camDirMove.lengthSq()<0.001)camDirMove.set(0,0,-1);
+  camDirMove.normalize();
+  camRight.crossVectors(camDirMove,cameraUp).normalize();
+
+  moveDir.set(0,0,0);
+  if(isMoving){
+    if(iz<0)moveDir.add(camDirMove);
+    if(iz>0)moveDir.sub(camDirMove);
+    if(ix<0)moveDir.sub(camRight);
+    if(ix>0)moveDir.add(camRight);
+    if(moveDir.lengthSq()>0.001)moveDir.normalize();
+  }
+
+  const targetSpeed=isMoving?(isRunning?MOVE.runSpeed:MOVE.walkSpeed):0;
+  const desiredVel=moveDir.clone().multiplyScalar(targetSpeed);
+
+  if(isMoving){
+    velocityXZ.lerp(desiredVel,1-Math.exp(-MOVE.accel*dt));
+  }else{
+    velocityXZ.lerp(desiredVel,1-Math.exp(-MOVE.decel*dt));
+  }
+
+  // Height from scale (Game5 style) — base ~1.8m
+  const scaleFactor = getScaleFactor(player);
+  const charH = 1.8 * scaleFactor;
+  const radius = Math.max(0.15, charH * 0.16);
+  const stepH = Math.max(0.25, charH * 0.32);
+
+  if(velocityXZ.lengthSq()>0.0001){
+    finalMove.copy(velocityXZ).multiplyScalar(dt);
+    const limit=worldSize*0.5-0.6;
+    nextPos.copy(player.position).add(finalMove);
+    if(Math.abs(nextPos.x)>limit){nextPos.x=player.position.x;velocityXZ.x=0;}
+    if(Math.abs(nextPos.z)>limit){nextPos.z=player.position.z;velocityXZ.z=0;}
+
+    bodyCenter.copy(player.position);
+    bodyCenter.y+=charH*0.5;
+
+    const moveLen=finalMove.length();
+    if(moveLen>0.001){
+      const dir=finalMove.clone().normalize();
+      movementRaycaster.set(bodyCenter,dir);
+      movementRaycaster.far=moveLen+radius+0.15;
+      const hits=movementRaycaster.intersectObjects(collisionMeshes,true)
+        .filter(h=>!isPlayerObject(h.object));
+
+      if(hits.length && hits[0].distance<moveLen+radius){
+        const hit=hits[0];
+        const normal=hit.face?hit.face.normal.clone():new THREE.Vector3(0,0,1);
+        const slide=finalMove.clone().projectOnPlane(normal);
+        nextPos.copy(player.position).add(slide);
+
+        if(Math.abs(nextPos.x)>limit)nextPos.x=player.position.x;
+        if(Math.abs(nextPos.z)>limit)nextPos.z=player.position.z;
+      }
+    }
+
+    rayOrigin.set(nextPos.x,player.position.y+stepH+0.25,nextPos.z);
+    movementRaycaster.set(rayOrigin,downVector);
+    movementRaycaster.far=stepH+1.8;
+
+    const floorHits=movementRaycaster.intersectObjects(collisionMeshes,true)
+      .filter(h=>!isPlayerObject(h.object));
+
+    if(floorHits.length){
+      const hitY=floorHits[0].point.y;
+      const diff=hitY-player.position.y;
+      if(diff<=stepH && diff>-0.9){
+        player.position.x=nextPos.x;
+        player.position.z=nextPos.z;
+        player.position.y=THREE.MathUtils.lerp(player.position.y,hitY,0.35);
+      }
+    }else{
+      player.position.x=nextPos.x;
+      player.position.z=nextPos.z;
+    }
+
+    const targetAngle=Math.atan2(velocityXZ.x,velocityXZ.z);
+    let diff=targetAngle-player.rotation.y;
+    while(diff<-Math.PI)diff+=Math.PI*2;
+    while(diff>Math.PI)diff-=Math.PI*2;
+    player.rotation.y+=diff*Math.min(1,MOVE.rotateSpeed*dt);
+  }
+
+  const speed=velocityXZ.length();
+  if(speed>0.8&&grounded){
+    const n=isRunning
+      ?findAction([/^run$/i,/run/i,/sprint/i])
+      :findAction([/^walk$/i,/walk/i,/jog/i,/locomotion/i]);
+    if(n)playAction(n,THREE.LoopRepeat);
+  }else if(grounded&&speed<0.15){
+    const idle=findAction([/^idle$/i,/idle/i,/stand/i]);
+    if(idle)playAction(idle,THREE.LoopRepeat);
+  }
+
+  velocityY-=MOVE.gravity*dt;
+  player.position.y+=velocityY*dt;
+
+  const checkH=Math.max(0.3,charH*0.25);
+  rayOrigin.set(player.position.x,player.position.y+checkH,player.position.z);
+  movementRaycaster.set(rayOrigin,downVector);
+  movementRaycaster.far=checkH+0.5;
+
+  const groundHits=movementRaycaster.intersectObjects(collisionMeshes,true)
+    .filter(h=>!isPlayerObject(h.object));
+
+  if(groundHits.length && velocityY<=0){
+    const gy=groundHits[0].point.y;
+    if(player.position.y<=gy+0.1){
+      player.position.y=gy;
+      velocityY=0;
+      grounded=true;
+    }
+  }else if(player.position.y<=groundY){
+    player.position.y=groundY;
+    velocityY=0;
+    grounded=true;
+  }else{
+    grounded=false;
+  }
+}
+
+function isElementInUI(target){
+  if(!target)return false;
+  return target!==canvas && !target.closest?.("#view");
+}
+
+let isDraggingCam=false;
+let prevTouchX=0,prevTouchY=0;
+let initialPinchDistance=null;
+
+addEventListener("pointerdown",e=>{
+  if(isElementInUI(e.target))return;
+  if(e.pointerType!=="touch"||e.isPrimary){
+    isDraggingCam=true;
+    prevTouchX=e.clientX;
+    prevTouchY=e.clientY;
+    if(canvas.setPointerCapture)try{canvas.setPointerCapture(e.pointerId)}catch(_){}
+  }
+});
+
+addEventListener("pointermove",e=>{
+  if(!isDraggingCam||!player||initialPinchDistance!==null)return;
+  const deltaX=e.clientX-prevTouchX;
+  const deltaY=e.clientY-prevTouchY;
+  cameraState.yaw -= deltaX * cameraState.sensitivity;
+  cameraState.pitch += deltaY * cameraState.sensitivity;
+  cameraState.pitch = THREE.MathUtils.clamp(cameraState.pitch, -0.1, 1.2);
+  prevTouchX=e.clientX;
+  prevTouchY=e.clientY;
+});
+
+addEventListener("pointerup",e=>{
+  isDraggingCam=false;
+  if(canvas.releasePointerCapture)try{canvas.releasePointerCapture(e.pointerId)}catch(_){}
+});
+addEventListener("pointercancel",()=>{isDraggingCam=false});
+
+addEventListener("touchstart",e=>{
+  if(isElementInUI(e.target))return;
+  if(e.touches.length===2){
+    isDraggingCam=false;
+    initialPinchDistance=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+  }
+},{passive:true});
+
+addEventListener("touchmove",e=>{
+  if(isElementInUI(e.target))return;
+  if(e.touches.length===2&&initialPinchDistance!==null){
+    const currentDistance=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+    const delta=(initialPinchDistance-currentDistance)*0.12;
+    if(cameraMode === 'close'){
+      // limited zoom-in so camera never collapses into the character
+      cameraState.userZoomClose = Math.max(-2.2, Math.min(40, cameraState.userZoomClose + delta));
+    }else{
+      cameraState.userZoomNormal = Math.max(-6, Math.min(80, cameraState.userZoomNormal + delta * 3));
+    }
+    initialPinchDistance=currentDistance;
+  }
+},{passive:true});
+
+addEventListener("touchend",e=>{
+  if(e.touches.length<2)initialPinchDistance=null;
+},{passive:true});
+
+addEventListener("wheel",e=>{
+  if(isElementInUI(e.target)||!player)return;
+  e.preventDefault();
+  const delta = e.deltaY * 0.035;
+  if(cameraMode === 'close'){
+    cameraState.userZoomClose = Math.max(-2.2, Math.min(40, cameraState.userZoomClose + delta));
+  }else{
+    cameraState.userZoomNormal = Math.max(-6, Math.min(80, cameraState.userZoomNormal + delta * 3));
+  }
+},{passive:false});
+
+let selectionHelper=null;
+function selectObject(o){
+  selected=o;
+  if(!o){
+    $("selection").style.display="none";
+    if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+    refreshObjectList();
+    return;
+  }
+  $("selection").textContent=o.name||o.userData.type||"Object";
+  $("selection").style.display="block";
+  if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+  const box=new THREE.Box3().setFromObject(o);
+  if(!box.isEmpty()){
+    selectionHelper=new THREE.Box3Helper(box,0x88ccff);
+    selectionHelper.material.depthTest=false;
+    selectionHelper.renderOrder=999;
+    scene.add(selectionHelper);
+  }
+  refreshObjectList();
+}
+
+function bindMove(id,x,z){
+  const el=$(id);
+  const on=e=>{
+    e.preventDefault();
+    if(el.setPointerCapture)try{el.setPointerCapture(e.pointerId)}catch(_){}
+    move.x=x; move.z=z;
+  };
+  const off=e=>{
+    e.preventDefault();
+    move.x=0; move.z=0;
+    if(el.releasePointerCapture)try{el.releasePointerCapture(e.pointerId)}catch(_){}
+  };
+  el.addEventListener("pointerdown",on);
+  ["pointerup","pointercancel","lostpointercapture"].forEach(t=>el.addEventListener(t,off));
+}
+bindMove("moveF",0,-1);
+bindMove("moveB",0,1);
+bindMove("moveL",-1,0);
+bindMove("moveR",1,0);
+
+$("jump").onpointerdown=e=>{e.preventDefault();jump()};
+
+// Run = toggle (one tap on, one tap off) — no need to hold
+function setRunning(on){
+  running = !!on;
+  const btn = $("run");
+  if(btn){
+    btn.textContent = running ? "Run ●" : "Run";
+    btn.style.background = running ? "rgba(255,100,80,.28)" : "";
+  }
+}
+$("run").onpointerdown = e => {
+  e.preventDefault();
+  setRunning(!running);
+};
+
+addEventListener("keydown",e=>{
+  keys[e.key]=true;
+  if(e.code==="Space")jump();
+  // Shift toggles run once (not hold)
+  if(e.key==="Shift" && !e.repeat) setRunning(!running);
+});
+addEventListener("keyup",e=>{
+  keys[e.key]=false;
+});
+addEventListener("keydown",e=>{if(e.key==="Delete"||e.key==="Backspace")$("delete").click()});
+
+function openPanel(id){
+  ["worldPanel","addPanel","animPanel"].forEach(x=>{
+    const el=$(x);
+    if(el)el.classList.remove("open");
+  });
+  const p=$(id);
+  if(p)p.classList.add("open");
+}
+$("worldBtn").onclick=()=>openPanel("worldPanel");
+$("addBtn").onclick=()=>openPanel("addPanel");
+$("animBtn").onclick=()=>{
+  openPanel("animPanel");
+  buildAnimChecklist();
+};
+function openPauseDialog(){
+  paused = true;
+  $("pause").textContent = "Pause";
+  const dlg = $("pauseDialog");
+  if(dlg) dlg.classList.add("open");
+  say("Paused");
+}
+function closePauseDialog(){
+  paused = false;
+  const dlg = $("pauseDialog");
+  if(dlg) dlg.classList.remove("open");
+  // close any open panels
+  ["worldPanel","addPanel","animPanel"].forEach(id=>{
+    const el = $(id); if(el) el.classList.remove("open");
+  });
+  say("Resumed");
+}
+$("pause").onclick = () => {
+  if(paused && $("pauseDialog") && $("pauseDialog").classList.contains("open")){
+    closePauseDialog();
+  } else {
+    openPauseDialog();
+  }
+};
+if($("pauseResume")) $("pauseResume").onclick = () => closePauseDialog();
+if($("pauseMenu")) $("pauseMenu").onclick = () => {
+  // Keep paused, open World menu panel
+  const dlg = $("pauseDialog");
+  if(dlg) dlg.classList.remove("open");
+  openPanel("worldPanel");
+  say("Menu");
+};
+if($("pauseHome")) $("pauseHome").onclick = () => {
+  // Back to splash / waiting screen
+  closePauseDialog();
+  if(driving) try{ exitVehicle(); }catch(_){}
+  paused = true;
+  gameStarted = false;
+  const ui = $("ui");
+  if(ui) ui.classList.add("hidden-boot");
+  const splash = $("splash");
+  if(splash){
+    splash.classList.remove("hide");
+    // Already loaded — Play ready immediately
+    const bar = $("splashBar");
+    if(bar) bar.style.width = "100%";
+    const st = $("splashStatus");
+    if(st) st.textContent = "جاهز — اضغط Play";
+    const pb = $("playBtn");
+    if(pb){ pb.classList.add("ready"); pb.textContent = "Play"; }
+  }
+  say("Home");
+};
+if($("pauseExit")) $("pauseExit").onclick = () => {
+  // Exit game: try close tab, fallback hard stop + blank
+  try{ queueSave(); }catch(_){}
+  paused = true;
+  gameStarted = false;
+  try{
+    window.close();
+  }catch(_){}
+  // If browser blocks window.close, show exit screen
+  document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0c10;color:rgba(255,255,255,.7);font:14px Inter,sans-serif">تم الخروج من اللعبة<br><span style="font-size:11px;opacity:.5;margin-top:8px;display:block">يمكنك إغلاق هذه الصفحة</span></div>';
+};
+document.querySelectorAll("[data-close]").forEach(b=>
+  b.onclick=()=>$(b.dataset.close).classList.remove("open")
+);
+if($("animSelectAll"))$("animSelectAll").onclick=()=>{
+  enabledAnimButtons.clear();
+  ["jump","wave","dance","sit","clap","cheer","yes","no","salute","kick","punch"].forEach(key=>{
+    const n=findAction([new RegExp(key,"i")]);
+    if(n&&!isLocomotionAnim(n))enabledAnimButtons.add(n);
+  });
+  if(!enabledAnimButtons.size){
+    Object.keys(actions).filter(n=>!isLocomotionAnim(n)).slice(0,6)
+      .forEach(n=>enabledAnimButtons.add(n));
+  }
+  buildAnimChecklist();
+  buildAnimationButtons();
+};
+if($("animClearAll"))$("animClearAll").onclick=()=>{
+  enabledAnimButtons.clear();
+  buildAnimChecklist();
+  buildAnimationButtons();
+};
+
+document.querySelectorAll("[data-type]").forEach(b=>b.onclick=async()=>{
+  const t=b.dataset.type;
+  if(t==="Man"){ $("modelFiles").click(); return; }
+  if(t==="Girl"){ await loadAssetGLB("./girl.glb","Girl","Girl"); return; }
+  if(t==="Home"){ await loadAssetGLB("./Home.glb","Home","Home"); return; }
+  if(t==="Car"){
+    say("Loading Car…");
+    const car = await loadAssetGLB("./Car.glb","Car","Car");
+    if(car){
+      car.userData.vehicle = true;
+      car.userData.type = "Car";
+      toast("Car added — press Drive or E near it");
+    } else {
+      // Fallback placeholder car so button always does something
+      const g = createPlaceholder("Car");
+      g.userData.vehicle = true;
+      g.userData.type = "Car";
+      g.name = "Car";
+      place(g, "Car");
+      toast("Car placeholder added (put Car.glb next to HTML)");
+    }
+    return;
+  }
+});
+
+function afterTransform(){
+  if(!selected)return;
+  selected.updateMatrixWorld(true);
+  selected.traverse(c=>{c.matrixAutoUpdate=true});
+  if(selectionHelper){
+    scene.remove(selectionHelper);
+    selectionHelper=null;
+    const box=new THREE.Box3().setFromObject(selected);
+    if(!box.isEmpty()){
+      selectionHelper=new THREE.Box3Helper(box,0x88ccff);
+      selectionHelper.material.depthTest=false;
+      selectionHelper.renderOrder=999;
+      scene.add(selectionHelper);
+    }
+  }
+  refreshColliders();
+  queueSave();
+}
+$("rotL").onclick=()=>{if(selected){selected.rotation.y-=Math.PI/12;afterTransform()}};
+$("rotR").onclick=()=>{if(selected){selected.rotation.y+=Math.PI/12;afterTransform()}};
+$("raise").onclick=()=>{if(selected){selected.position.y+=.25;afterTransform()}};
+$("lower").onclick=()=>{if(selected){selected.position.y-=.25;afterTransform()}};
+if($("scaleMinus"))$("scaleMinus").onclick=()=>{
+  if(!selected||selected===player)return toast("Select an object first");
+  selected.scale.multiplyScalar(0.9);
+  afterTransform();
+};
+if($("scalePlus"))$("scalePlus").onclick=()=>{
+  if(!selected||selected===player)return toast("Select an object first");
+  selected.scale.multiplyScalar(1.12);
+  afterTransform();
+};
+
+function deleteSelectedObject(){
+  if(!selected)return toast("Select an object first");
+  if(selected===player)return toast("Man cannot be deleted");
+  const name=selected.name||"Object";
+  const i=objects.indexOf(selected);
+  if(i>=0)objects.splice(i,1);
+  disposeObject(selected);
+  selected=null;
+  if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+  $("selection").style.display="none";
+  refreshColliders();
+  refreshObjectList();
+  queueSave();
+  toast("Deleted "+name);
+}
+$("delete").onclick=deleteSelectedObject;
+if($("deleteSelected"))$("deleteSelected").onclick=deleteSelectedObject;
+if($("deleteAllObjs"))$("deleteAllObjs").onclick=()=>{
+  if(!objects.length)return toast("Nothing to delete");
+  for(const o of [...objects])disposeObject(o);
+  objects.length=0;
+  selected=null;
+  if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+  $("selection").style.display="none";
+  refreshColliders();
+  refreshObjectList();
+  queueSave();
+  toast("All objects deleted");
+};
+
+const fileUrls=new Map();
+const manager=new THREE.LoadingManager();
+manager.setURLModifier(url=>{
+  const key=url.split("/").pop().split("?")[0];
+  return fileUrls.get(key)||url;
+});
+const importLoader=new GLTFLoader(manager);
+let importBusy=false;
+
+async function activateImportedMan(gltf,assetKey,fileName){
+  const oldPos=player?player.position.clone():new THREE.Vector3(0,groundY,0);
+  await buildManFromGLTF(gltf,assetKey,fileName,oldPos);
+  queueSave();
+}
+async function buildManFromGLTF(gltf,assetKey,fileName,pos){
+  if(player)root.remove(player);
+  player=new THREE.Group();
+  player.name=fileName||"Man.glb";
+  player.userData={type:"Man",solid:true,player:true,assetKey:assetKey,imported:true};
+  playerVisual=gltf.scene;
+  playerVisual.name=player.name;
+  player.add(playerVisual);
+  const manKey=new THREE.DirectionalLight(0xfff4ec,.5);manKey.position.set(3.5,5,2);manKey.name="ManKey";player.add(manKey);
+  const manFill=new THREE.HemisphereLight(0xe8eef8,0x3a3a42,.7);manFill.name="ManFill";player.add(manFill);
+  const manRim=new THREE.DirectionalLight(0xc2d4ff,.35);manRim.position.set(-3,3.5,-4);manRim.name="ManRim";player.add(manRim);
+  const manSide=new THREE.DirectionalLight(0xfff0e8,.22);manSide.position.set(-2.5,2,3);manSide.name="ManSide";player.add(manSide);
+  playerVisual.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=false;}});
+  playerVisual.scale.set(1,1,1);
+  // If restoring with a position, scale may be applied later from save; default 0.03
+  if(!player.scale || player.scale.x === 1 && player.scale.y === 1 && player.scale.z === 1){
+    player.scale.setScalar(0.03);
+  }
+  player.position.copy(pos||new THREE.Vector3(0,groundY,0));
+  root.add(player);
+  player.updateMatrixWorld(true);
+  const vb=new THREE.Box3().setFromObject(player);
+  player.position.y += (groundY - vb.min.y);
+  playerVisual.position.y = 0;
+  _cachedCharH = Math.max(0.05, vb.max.y - vb.min.y);
+  cameraState.currentDistance = Math.max(2.5, _cachedCharH * 2.8);
+  cameraState.userZoomClose=0;
+  cameraState.userZoomNormal=0;
+  _camInitialized = false;
+  cameraSmoothPos.set(0,0,0);
+  setupAnimations(gltf);
+  refreshColliders();
+  updateManScaleUI();
+  queueSave();
+  say(fileName+" active");
+}
+async function importOneFile(file, sharedUrls, customName){
+  const sourceUrl=sharedUrls.get(file.name)||URL.createObjectURL(file);
+  const gltf=await importLoader.loadAsync(sourceUrl);
+  const o=gltf.scene;
+  const assetKey="user:"+file.name+":"+file.size+":"+file.lastModified;
+  try{
+    const db=await dbOpen();
+    const tx=db.transaction("assets","readwrite");
+    tx.objectStore("assets").put({key:assetKey,name:file.name,blob:file,type:file.type||"model/gltf-binary"});
+  }catch(err){console.warn("Asset storage failed",err)}
+  const low=file.name.toLowerCase();
+  let type="Object";
+  if(/car|vehicle/.test(low))type="Car";
+  else if(/home|house|building/.test(low))type="Home";
+  else if(/girl|woman|female/.test(low))type="Girl";
+  else if(/man|male|character/.test(low))type="Man";
+  else if(/mirror|glass/.test(low))type="Mirror";
+
+  o.userData={
+    type,
+    solid:true,
+    imported:true,
+    vehicle:type==="Car"||/car|vehicle/i.test(type+file.name),
+    assetKey
+  };
+  o.name=customName||file.name.replace(/\.(glb|gltf)$/i,"");
+  optimizeImportedModel(o);
+  if(type==="Home"||/mirror/i.test(low)){
+    prepareHomeMirrors(o);
+    
+    updateLightMirrors(true);
+  }
+  if(type==="Man"){
+    await activateImportedMan(gltf,assetKey,file.name);
+    return player;
+  }
+  place(o,o.name);
+  return o;
+}
+
+$("importModel").onclick=async()=>{
+  if(importBusy)return toast("Import already running…");
+  const fs=[...$("modelFiles").files];
+  if(!fs.length)return toast("Choose a GLB or GLTF file");
+
+  const models=fs.filter(f=>/\.(glb|gltf)$/i.test(f.name));
+  if(!models.length)return toast("Choose GLB or GLTF");
+
+  importBusy=true;
+  const status=$("importStatus");
+  fileUrls.clear();
+  const blobList=[];
+  fs.forEach(f=>{
+    const u=URL.createObjectURL(f);
+    blobList.push(u);
+    fileUrls.set(f.name,u);
+  });
+
+  const baseName=$("objectName").value.trim();
+  let done=0;
+  try{
+    for(const file of models){
+      if(status)status.textContent=`Loading ${done+1}/${models.length}: ${file.name}`;
+      say(`Loading ${file.name}…`);
+      await new Promise(r=>setTimeout(r,30));
+      try{
+        const name=models.length===1&&baseName?baseName:undefined;
+        await importOneFile(file,fileUrls,name);
+        done++;
+      }catch(err){
+        console.error(err);
+        toast("Failed: "+file.name);
+      }
+    }
+    if(status)status.textContent=done?`Imported ${done} model(s)`:"Import finished with errors";
+    toast(done?`Imported ${done} model(s)`:"Import failed");
+  }finally{
+    importBusy=false;
+    setTimeout(()=>{blobList.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});fileUrls.clear()},5000);
+  }
+};
+
+function range(id,fn){const el=$(id);if(el)el.oninput=e=>fn(+e.target.value)}
+range("day",v=>{env.day=v;applyEnvironment();queueSave()});
+range("sunAngle",v=>{env.angle=v;applyEnvironment();queueSave()});
+range("skySat",v=>{env.skySat=v;applyEnvironment();queueSave()});
+range("charFront",v=>{env.charFront=v;applyEnvironment();queueSave()});
+range("charBack",v=>{env.charBack=v;applyEnvironment();queueSave()});
+range("charFill",v=>{env.charFill=v;applyEnvironment();queueSave()});
+range("fog",v=>{env.fog=v;applyEnvironment();queueSave()});
+range("light",v=>{env.light=v;applyEnvironment();queueSave()});
+/* ---------- Man scale (Game5 style: multiply player.scale) ---------- */
+function updateManScaleUI(){
+  const v = $("manScaleValue");
+  if(v && player) v.textContent = getScaleFactor(player).toFixed(4);
+  else if(v) v.textContent = "0.0300";
+}
+function applyManScale(factor){
+  if(!player) return;
+  player.scale.multiplyScalar(factor);
+  // Keep feet on ground after scale
+  player.updateMatrixWorld(true);
+  const vb = new THREE.Box3().setFromObject(player);
+  if(vb.min.y < groundY - 0.001){
+    player.position.y += (groundY - vb.min.y);
+  }
+  _cachedCharH = Math.max(0.05, vb.max.y - vb.min.y);
+  // Re-snap camera to new height (prevents feet dive)
+  _camInitialized = false;
+  cameraSmoothPos.set(0,0,0);
+  cameraState.currentDistance = Math.max(cameraState.minDistance, _cachedCharH * 2.6);
+  updateManScaleUI();
+  queueSave(); // always persist scale automatically
+}
+if($("manScaleMinus")) $("manScaleMinus").onclick = () => applyManScale(0.9);
+if($("manScalePlus")) $("manScalePlus").onclick = () => applyManScale(1.1);
+
+// Camera mode buttons (Game5 style)
+if($("btnCamClose")) $("btnCamClose").onclick = () => {
+  cameraMode = 'close';
+  $("btnCamClose").style.color = '#70b5ff';
+  if($("btnCamNormal")) $("btnCamNormal").style.color = 'white';
+};
+if($("btnCamNormal")) $("btnCamNormal").onclick = () => {
+  cameraMode = 'normal';
+  $("btnCamNormal").style.color = '#70b5ff';
+  if($("btnCamClose")) $("btnCamClose").style.color = 'white';
+};
+
+const DB_NAME="LG_SAVE_DB_V2";
+const DB_VER=1;
+const STORE_WORLD="world_v2";
+const STORE_OBJECTS="objects_v2";
+const STORE_ASSETS="assets_v2";
+let dbPromise=null,saveTimer=0,saveBusy=false,saveAgain=false;
+function dbOpen(){
+  if(dbPromise)return dbPromise;
+  dbPromise=new Promise((resolve,reject)=>{
+    let req;
+    try{req=indexedDB.open(DB_NAME,DB_VER)}catch(err){dbPromise=null;reject(err);return}
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains(STORE_WORLD))db.createObjectStore(STORE_WORLD);
+      if(!db.objectStoreNames.contains(STORE_OBJECTS))db.createObjectStore(STORE_OBJECTS,{keyPath:"id"});
+      if(!db.objectStoreNames.contains(STORE_ASSETS))db.createObjectStore(STORE_ASSETS,{keyPath:"key"});
+    };
+    req.onsuccess=()=>{const db=req.result;db.onversionchange=()=>db.close();resolve(db)};
+    req.onerror=()=>{dbPromise=null;reject(req.error||new Error("IndexedDB open failed"))};
+    req.onblocked=()=>console.warn("Save database is blocked by another tab");
+  });
+  return dbPromise;
+}
+function snapshot(){
+  const rows=objects.map((o,i)=>({id:i+1,name:o.name,type:o.userData.type||"Object",pos:o.position.toArray(),rot:[o.rotation.x,o.rotation.y,o.rotation.z],scale:o.scale.toArray(),assetKey:o.userData.assetKey||null,assetPath:o.userData.assetPath||null}));
+  // Always save player transform so position is restored
+  if(player){
+    rows.push({
+      id:999999,
+      name:player.name||"Man",
+      type:"Man",
+      pos:player.position.toArray(),
+      rot:[player.rotation.x,player.rotation.y,player.rotation.z],
+      scale:player.scale.toArray(),
+      assetKey:player.userData?.assetKey||null
+    });
+  }
+  return rows;
+}
+function queueSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveState(),300)}
+async function saveState(){
+  if(saveBusy){saveAgain=true;return}
+  saveBusy=true;
+  try{
+    const db=await dbOpen();
+    const tx=db.transaction([STORE_WORLD,STORE_OBJECTS],"readwrite");
+    tx.objectStore(STORE_WORLD).put({
+      version:2,
+      env:{...env},
+      worldSize,
+      groundY,
+      playerScale:player?player.scale.toArray():[1,1,1],
+      playerAssetKey:player?.userData?.assetKey||null,
+      playerPos:player?player.position.toArray():[0,0,0],
+      playerRot:player?[player.rotation.x,player.rotation.y,player.rotation.z]:[0,0,0]
+    },"settings");
+    const os=tx.objectStore(STORE_OBJECTS);os.clear();
+    for(const d of snapshot())os.put(d);
+    await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error("Save transaction failed"));tx.onabort=()=>reject(tx.error||new Error("Save transaction aborted"))});
+  }catch(e){console.warn("Save skipped:",e?.name||e)}
+  finally{saveBusy=false;if(saveAgain){saveAgain=false;queueSave()}}
+}
+async function restoreState(){
+  try{
+    const db=await dbOpen();
+    const tx=db.transaction([STORE_WORLD,STORE_OBJECTS,STORE_ASSETS],"readonly");
+    const settingsReq=tx.objectStore(STORE_WORLD).get("settings");
+    const allReq=tx.objectStore(STORE_OBJECTS).getAll();
+    await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error("Restore transaction failed"));tx.onabort=()=>reject(tx.error||new Error("Restore transaction aborted"))});
+    const settings=settingsReq.result;
+    if(settings?.env){
+      Object.assign(env, settings.env);
+      const mapIds = {day:"day", angle:"sunAngle", skySat:"skySat", fog:"fog", light:"light",
+                      charFront:"charFront", charBack:"charBack", charFill:"charFill"};
+      for(const [k,id] of Object.entries(mapIds)){
+        const el = $(id);
+        if(el && env[k] !== undefined) el.value = env[k];
+      }
+      // restore ground UI
+      const gc = $("groundColor");
+      if(gc && env.groundColor) gc.value = env.groundColor;
+      const gb = $("groundBrightness");
+      if(gb && env.groundBrightness !== undefined){
+        gb.value = env.groundBrightness;
+        const gbv = $("groundBrightnessValue");
+        if(gbv) gbv.textContent = Number(env.groundBrightness).toFixed(2);
+      }
+      // apply ground material immediately
+      if(typeof groundMat !== "undefined" && groundMat){
+        if(env.groundColor) groundMat.color.set(env.groundColor);
+        const b = Number(env.groundBrightness) || 1;
+        groundMat.color.multiplyScalar(b);
+        groundMat.needsUpdate = true;
+      }
+    }
+    if(settings?.worldSize) worldSize = settings.worldSize;
+    if(typeof settings?.groundY === "number") groundY = settings.groundY;
+    window.__savedPlayerScale = settings?.playerScale || null;
+    window.__savedPlayerPos = settings?.playerPos || null;
+    window.__savedPlayerRot = settings?.playerRot || null;
+    for(const d of (allReq.result||[])){
+      if(d.type==="Man"&&d.assetKey){
+        const ar=await new Promise((resolve,reject)=>{const r=tx.objectStore(STORE_ASSETS).get(d.assetKey);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}).catch(()=>null);
+        if(ar?.blob){const url=URL.createObjectURL(ar.blob);try{const g=await importLoader.loadAsync(url);await buildManFromGLTF(g,d.assetKey,d.name,new THREE.Vector3().fromArray(d.pos))}finally{URL.revokeObjectURL(url)}}
+      }else if(d.type==="Girl"||d.type==="Home"||d.type==="Car"){
+        const path=d.type==="Girl"?"./girl.glb":d.type==="Home"?"./Home.glb":"./Car.glb";
+        loadAssetGLB(path,d.type,d.name,{skipPlace:true}).then(obj=>{if(!obj)return;obj.position.fromArray(d.pos);obj.rotation.set(...d.rot);obj.scale.fromArray(d.scale);obj.updateMatrixWorld(true);refreshColliders();refreshObjectList()}).catch(()=>{});
+      }
+    }
+    // Restore player position (from settings or from Man snapshot row)
+    const applyPlayerTransform = () => {
+      if(!player) return;
+      const pos = window.__savedPlayerPos;
+      const rot = window.__savedPlayerRot;
+      const scl = window.__savedPlayerScale;
+      if(scl && Array.isArray(scl) && scl.length >= 3){
+        player.scale.fromArray(scl);
+      } else {
+        // no save yet → keep default 0.03
+        if(Math.abs(player.scale.x - 1) < 1e-6) player.scale.setScalar(0.03);
+      }
+      if(pos && Array.isArray(pos) && pos.length >= 3){
+        player.position.fromArray(pos);
+      }
+      if(rot && Array.isArray(rot) && rot.length >= 3){
+        player.rotation.set(rot[0], rot[1], rot[2]);
+      }
+      player.updateMatrixWorld(true);
+      const vb = new THREE.Box3().setFromObject(player);
+      _cachedCharH = Math.max(0.05, vb.max.y - vb.min.y);
+      _camInitialized = false;
+      cameraSmoothPos.set(0,0,0);
+      updateManScaleUI();
+      queueSave(); // keep storage in sync with live scale
+    };
+    // Delay slightly so loadMan has finished
+    setTimeout(applyPlayerTransform, 120);
+    setTimeout(applyPlayerTransform, 600);
+
+    applyEnvironment();
+    refreshColliders();
+    refreshObjectList();
+  }catch(e){console.warn("Restore skipped:",e?.name||e)}
+}
+$("clearSave").onclick=async()=>{
+  try{const db=await dbOpen();const tx=db.transaction([STORE_WORLD,STORE_OBJECTS],"readwrite");tx.objectStore(STORE_WORLD).clear();tx.objectStore(STORE_OBJECTS).clear();await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});for(const o of [...objects])disposeObject(o);objects.length=0;selected=null;if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null}$('selection').style.display="none";refreshColliders();refreshObjectList();toast("World storage cleared")}catch(e){toast("Storage reset failed")}
+};
+
+updateManScaleUI();
+
+/* ---------- Splash boot: real load progress, Play when ready ---------- */
+let gameStarted = false;
+const splashEl = $("splash");
+const splashBar = $("splashBar");
+const splashStatus = $("splashStatus");
+const playBtn = $("playBtn");
+
+function setSplashProgress(pct, msg){
+  if(splashBar) splashBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+  if(splashStatus) splashStatus.textContent = msg || "";
+}
+
+function unlockPlay(){
+  if(playBtn){
+    playBtn.classList.add("ready");
+    playBtn.textContent = "Play";
+  }
+  setSplashProgress(100, "جاهز — اضغط Play");
+}
+
+function startGame(){
+  gameStarted = true;
+  paused = false;
+  if(splashEl) splashEl.classList.add("hide");
+  const ui = $("ui");
+  if(ui) ui.classList.remove("hidden-boot");
+  const dlg = $("pauseDialog");
+  if(dlg) dlg.classList.remove("open");
+  say("AB Open World");
+}
+
+if(playBtn){
+  playBtn.onclick = e => {
+    e.preventDefault();
+    if(!playBtn.classList.contains("ready")) return;
+    startGame();
+  };
+}
+
+async function bootGame(){
+  try{
+    setSplashProgress(8, "تهيئة العالم…");
+    await new Promise(r => requestAnimationFrame(r));
+
+    setSplashProgress(25, "تحميل الشخصية…");
+    await loadMan();
+
+    setSplashProgress(55, "استعادة العالم المحفوظ…");
+    await restoreState();
+
+    setSplashProgress(80, "تجهيز الإضاءة والكاميرا…");
+    applyEnvironment();
+    if(typeof updateLightMirrors === "function") updateLightMirrors(true);
+    await new Promise(r => setTimeout(r, 40));
+
+    setSplashProgress(100, "جاهز — اضغط Play");
+    unlockPlay();
+  }catch(err){
+    console.error(err);
+    setSplashProgress(100, "تم التحميل مع بعض الأخطاء");
+    unlockPlay();
+  }
+}
+
+addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight,false);
+  if(typeof resizeMirrorReflectors === "function") resizeMirrorReflectors();
+});
+
+const clock=new THREE.Clock();
+let _lastPosSave = 0;
+function frame(){
+  requestAnimationFrame(frame);
+  const dt = Math.min(clock.getDelta(), 0.033);
+
+  // Always render so splash background (3D world) can show softly if desired
+  if(gameStarted && !paused){
+    if(driving){
+      updateVehicle(dt);
+    }else if(selected && selected !== player){
+      updateSelectedObject(dt);
+    }else{
+      updatePlayer(dt);
+    }
+    updateFollowCamera(dt);
+    if(mixer && !driving) mixer.update(dt);
+    updateDriveButtonVisibility();
+
+    const now = performance.now();
+    if(player && now - _lastPosSave > 2500){
+      _lastPosSave = now;
+      queueSave();
+    }
+  } else if(!gameStarted){
+    // Keep camera looking at spawn while on splash
+    if(player) updateFollowCamera(dt);
+  }
+
+  updateLightMirrors();
+  renderer.render(scene, camera);
+}
+frame();
+bootGame();
+
+(function () {
+  const colorInput = document.getElementById('groundColor');
+  const brightnessInput = document.getElementById('groundBrightness');
+  const brightnessValue = document.getElementById('groundBrightnessValue');
+
+  function updateSimpleGround() {
+    if (typeof groundMat === 'undefined' || !groundMat) return;
+    const hex = (colorInput && colorInput.value) ? colorInput.value : (env.groundColor || '#7a8a6e');
+    const brightness = brightnessInput ? Number(brightnessInput.value) || 1 : (env.groundBrightness || 1);
+    groundMat.color.set(hex);
+    groundMat.color.multiplyScalar(brightness);
+    groundMat.needsUpdate = true;
+    if (brightnessValue) brightnessValue.textContent = brightness.toFixed(2);
+    // keep env in sync so storage works
+    env.groundColor = hex;
+    env.groundBrightness = brightness;
+    if (typeof queueSave === 'function') queueSave();
+  }
+
+  if (colorInput) colorInput.addEventListener('input', updateSimpleGround);
+  if (brightnessInput) brightnessInput.addEventListener('input', updateSimpleGround);
+})();
+</script>
+</body>
+</html>
